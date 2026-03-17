@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MTG Life Counter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8c96d;
+            --gold-dark: #8a6a1f;
+            --bg-deep: #0a0a0f;
+            --bg-panel: #10101a;
+            --bg-card: #14141f;
+            --text-primary: #f0e8d5;
+            --text-muted: #7a6e5e;
+
+            /* Mana colors per player */
+            --p1-accent: #3a7bd5;
+            /* Blue – Island */
+            --p1-glow: #1a4a9a;
+            --p2-accent: #c0392b;
+            /* Red – Mountain */
+            --p2-glow: #7a1a10;
+            --p3-accent: #27ae60;
+            /* Green – Forest */
+            --p3-glow: #145a32;
+            --p4-accent: #8e44ad;
+            /* Purple – Swamp-ish */
+            --p4-glow: #4a1a6a;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-deep);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* ── LAYOUT ────────────────────────────────────── */
+        #app {
+            display: flex;
+            flex-direction: column;
+            width: 100dvw;
+            height: 100dvh;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            flex: 1;
+            gap: 3px;
+            padding: 3px;
+            background: var(--bg-deep);
+        }
+
+        /* ── PLAYER CARD ───────────────────────────────── */
+        .player {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 14px 10px 10px;
+            transition: background 0.3s;
+        }
+
+        .player::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.07;
+            pointer-events: none;
+            background-image:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.03) 10px,
+                    rgba(255, 255, 255, 0.03) 20px);
+        }
+
+        /* Accent border top */
+        .player::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .player[data-player="1"]::after {
+            background: linear-gradient(90deg, transparent, var(--p1-accent), transparent);
+        }
+
+        .player[data-player="2"]::after {
+            background: linear-gradient(90deg, transparent, var(--p2-accent), transparent);
+        }
+
+        .player[data-player="3"]::after {
+            background: linear-gradient(90deg, transparent, var(--p3-accent), transparent);
+        }
+
+        .player[data-player="4"]::after {
+            background: linear-gradient(90deg, transparent, var(--p4-accent), transparent);
+        }
+
+        /* Subtle inner glow when at low HP */
+        .player.danger {
+            background: #1a0808;
+        }
+
+        .player.danger .life-display {
+            color: #ff6b6b !important;
+            text-shadow: 0 0 30px #ff4444;
+        }
+
+        .player[data-player="1"] {
+            --accent: var(--p1-accent);
+            --glow: var(--p1-glow);
+        }
+
+        .player[data-player="2"] {
+            --accent: var(--p2-accent);
+            --glow: var(--p2-glow);
+        }
+
+        .player[data-player="3"] {
+            --accent: var(--p3-accent);
+            --glow: var(--p3-glow);
+        }
+
+        .player[data-player="4"] {
+            --accent: var(--p4-accent);
+            --glow: var(--p4-glow);
+        }
+
+        /* ── NAME EDITOR ──────────────────────────────── */
+        .player-name-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .player-name {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.7rem, 2.5vw, 1rem);
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 90%;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .player-name:focus {
+            border-bottom-color: var(--accent);
+        }
+
+        /* ── LIFE DISPLAY ─────────────────────────────── */
+        .life-display {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 900;
+            line-height: 1;
+            color: var(--text-primary);
+            text-shadow: 0 0 40px var(--glow);
+            transition: transform 0.1s, color 0.4s, text-shadow 0.4s;
+            user-select: none;
+            position: relative;
+        }
+
+        .life-display.bump {
+            transform: scale(1.12);
+        }
+
+        /* Delta indicator */
+        .delta {
+            position: absolute;
+            top: -0.6em;
+            right: -0.4em;
+            font-size: 0.28em;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(0);
+            transition: opacity 0.6s, transform 0.6s;
+            pointer-events: none;
+        }
+
+        .delta.show {
+            opacity: 1;
+            transform: translateY(-1.2em);
+        }
+
+        .delta.positive {
+            color: #4dff91;
+        }
+
+        .delta.negative {
+            color: #ff5c5c;
+        }
+
+        /* ── BUTTON ROWS ──────────────────────────────── */
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        button {
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            transform: scale(0.93);
+        }
+
+        /* Large +/- */
+        .btn-main {
+            width: clamp(44px, 12vw, 72px);
+            height: clamp(44px, 10vw, 64px);
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-main:hover {
+            background: var(--glow);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--glow);
+        }
+
+        /* Small +5/-5 */
+        .btn-fast {
+            padding: 5px 10px;
+            font-size: clamp(0.65rem, 2.2vw, 0.85rem);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+        }
+
+        .btn-fast:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ── POISON / COMMANDER DAMAGE ─────────────────── */
+        .counters-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mini-counter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .mini-label {
+            font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .mini-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mini-val {
+            font-size: clamp(0.75rem, 2.5vw, 1rem);
+            font-weight: 700;
+            min-width: 22px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .btn-mini {
+            width: clamp(20px, 5vw, 28px);
+            height: clamp(20px, 5vw, 28px);
+            font-size: clamp(0.75rem, 2vw, 1rem);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-mini:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* poison turns green when >= 10 */
+        .poison-critical .mini-val {
+            color: #4dff91;
+            text-shadow: 0 0 8px #00cc55;
+        }
+
+        /* ── BOTTOM BAR ─────────────────────────────────── */
+        #bottom-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 16px;
+            background: #0c0c14;
+            border-top: 1px solid rgba(201, 168, 76, 0.15);
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        #title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.65rem, 2.5vw, 0.9rem);
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px var(--gold-dark);
+            white-space: nowrap;
+        }
+
+        #reset-btn {
+            padding: 8px 18px;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #1a0d00, #2c1800);
+            color: var(--gold);
+            border: 1px solid var(--gold-dark);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+
+        #reset-btn:hover {
+            background: linear-gradient(135deg, #2c1800, #4a2c00);
+            box-shadow: 0 0 20px rgba(201, 168, 76, 0.45);
+        }
+
+        #reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ── RESET CONFIRMATION OVERLAY ─────────────────── */
+        #confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        #confirm-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #confirm-box {
+            background: #16162a;
+            border: 1px solid var(--gold-dark);
+            border-radius: 16px;
+            padding: 30px 36px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(201, 168, 76, 0.25);
+            max-width: 320px;
+            width: 90%;
+        }
+
+        #confirm-box h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        #confirm-box p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 22px;
+        }
+
+        .confirm-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        #confirm-yes {
+            padding: 10px 24px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            background: linear-gradient(135deg, #4a0000, #800000);
+            color: #ffaaaa;
+            border: 1px solid #800000;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        #confirm-yes:hover {
+            background: linear-gradient(135deg, #700000, #aa0000);
+        }
+
+        #confirm-no {
+            padding: 10px 24px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        #confirm-no:hover {
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ── MOBILE: rotate cards on portrait ──────────── */
+        /* Players 3 & 4 (bottom row) are rotated 180° on landscape screens
+       so opponents can read across the table */
+        @media (orientation: landscape) and (min-width: 600px) {
+
+            .player[data-player="3"],
+            .player[data-player="4"] {
+                transform: rotate(180deg);
+            }
+        }
+
+        /* Tighten spacing on very small screens */
+        @media (max-width: 400px) {
+            .player {
+                gap: 6px;
+                padding: 8px 6px 6px;
+            }
+
+            #bottom-bar {
+                padding: 4px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div id="grid">
+            <!-- Players generated by JS -->
+        </div>
+        <div id="bottom-bar">
+            <span id="title">⚔ MTG Life Counter</span>
+            <button id="reset-btn">↺ Reiniciar</button>
+        </div>
+    </div>
+
+    <!-- Reset confirmation -->
+    <div id="confirm-overlay">
+        <div id="confirm-box">
+            <h2>¿Reiniciar partida?</h2>
+            <p>Se restablecerán las vidas y contadores de todos los jugadores a 40.</p>
+            <div class="confirm-btns">
+                <button id="confirm-yes">Sí, reiniciar</button>
+                <button id="confirm-no">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STARTING_LIFE = 40;
+        const PLAYERS = [
+            { id: 1, name: 'Jugador 1' },
+            { id: 2, name: 'Jugador 2' },
+            { id: 3, name: 'Jugador 3' },
+            { id: 4, name: 'Jugador 4' },
+        ];
+
+        // State
+        let state = PLAYERS.map(p => ({
+            id: p.id,
+            name: p.name,
+            life: STARTING_LIFE,
+            poison: 0,
+            commander: 0,
+        }));
+
+        // Build UI
+        const grid = document.getElementById('grid');
+
+        function createPlayerCard(player) {
+            const el = document.createElement('div');
+            el.className = 'player';
+            el.dataset.player = player.id;
+            el.id = `player-${player.id}`;
+
+            el.innerHTML = `
+      <div class="player-name-wrap">
+        <input class="player-name" type="text" value="${player.name}"
+               maxlength="20" aria-label="Nombre del jugador ${player.id}" />
+      </div>
+
+      <div class="life-display" id="life-${player.id}">
+        ${player.life}
+        <span class="delta" id="delta-${player.id}"></span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-fast" data-pid="${player.id}" data-delta="-5">−5</button>
+        <button class="btn-main" data-pid="${player.id}" data-delta="-1">−</button>
+        <button class="btn-main" data-pid="${player.id}" data-delta="+1">+</button>
+        <button class="btn-fast" data-pid="${player.id}" data-delta="+5">+5</button>
+      </div>
+
+      <div class="counters-row">
+        <div class="mini-counter" id="poison-wrap-${player.id}">
+          <span class="mini-label">☠ Veneno</span>
+          <div class="mini-controls">
+            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1">−</button>
+            <span class="mini-val" id="poison-${player.id}">0</span>
+            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1">+</button>
+          </div>
+        </div>
+        <div class="mini-counter">
+          <span class="mini-label">⚔ Cmdr</span>
+          <div class="mini-controls">
+            <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="-1">−</button>
+            <span class="mini-val" id="cmdr-${player.id}">0</span>
+            <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="+1">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+            return el;
+        }
+
+        PLAYERS.forEach(p => {
+            grid.appendChild(createPlayerCard(p));
+        });
+
+        // ── Render ───────────────────────────────────────────
+        function render(id, delta) {
+            const s = state.find(p => p.id === id);
+            const lifeEl = document.getElementById(`life-${id}`);
+            const deltaEl = document.getElementById(`delta-${id}`);
+            const poisonEl = document.getElementById(`poison-${id}`);
+            const cmdrEl = document.getElementById(`cmdr-${id}`);
+            const poisonWrap = document.getElementById(`poison-wrap-${id}`);
+            const card = document.getElementById(`player-${id}`);
+
+            // Life number
+            lifeEl.childNodes[0].textContent = s.life;
+
+            // Danger mode
+            card.classList.toggle('danger', s.life <= 5);
+
+            // Delta badge
+            if (delta !== undefined) {
+                deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
+                deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
+                clearTimeout(deltaEl._timeout);
+                deltaEl._timeout = setTimeout(() => {
+                    deltaEl.classList.remove('show');
+                }, 1200);
+            }
+
+            // Bump animation
+            lifeEl.classList.remove('bump');
+            void lifeEl.offsetWidth; // reflow
+            lifeEl.classList.add('bump');
+            clearTimeout(lifeEl._bumpTimeout);
+            lifeEl._bumpTimeout = setTimeout(() => lifeEl.classList.remove('bump'), 120);
+
+            // Mini counters
+            poisonEl.textContent = s.poison;
+            cmdrEl.textContent = s.commander;
+            poisonWrap.classList.toggle('poison-critical', s.poison >= 10);
+        }
+
+        function renderAll() {
+            state.forEach(s => render(s.id));
+        }
+
+        // ── Events: life buttons ─────────────────────────────
+        grid.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-delta]');
+            if (!btn) return;
+
+            const pid = parseInt(btn.dataset.pid);
+            const type = btn.dataset.type; // undefined | poison | commander
+            const delta = parseInt(btn.dataset.delta);
+            const s = state.find(p => p.id === pid);
+
+            if (!type) {
+                // Main life buttons
+                s.life = Math.max(-999, s.life + delta);
+                render(pid, delta);
+            } else {
+                // Mini counters
+                s[type] = Math.max(0, s[type] + delta);
+                render(pid);
+            }
+        });
+
+        // ── Events: name input ───────────────────────────────
+        grid.addEventListener('input', e => {
+            if (!e.target.classList.contains('player-name')) return;
+            const card = e.target.closest('.player');
+            const pid = parseInt(card.dataset.player);
+            state.find(p => p.id === pid).name = e.target.value;
+        });
+
+        // Prevent keyboard from pushing layout on mobile
+        grid.addEventListener('focusin', e => {
+            if (e.target.classList.contains('player-name')) {
+                e.target.select();
+            }
+        });
+
+        // ── Reset ────────────────────────────────────────────
+        const overlay = document.getElementById('confirm-overlay');
+        const confirmYes = document.getElementById('confirm-yes');
+        const confirmNo = document.getElementById('confirm-no');
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            overlay.classList.add('show');
+        });
+
+        confirmNo.addEventListener('click', () => {
+            overlay.classList.remove('show');
+        });
+
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) overlay.classList.remove('show');
+        });
+
+        confirmYes.addEventListener('click', () => {
+            state.forEach((s, i) => {
+                s.life = STARTING_LIFE;
+                s.poison = 0;
+                s.commander = 0;
+                // Reset name inputs
+                const card = document.getElementById(`player-${s.id}`);
+                card.querySelector('.player-name').value = PLAYERS[i].name;
+                s.name = PLAYERS[i].name;
+            });
+            renderAll();
+            overlay.classList.remove('show');
+        });
+
+        // ── Init ─────────────────────────────────────────────
+        renderAll();
+
+        // Disable scroll/zoom on touch while using buttons
+        document.addEventListener('touchmove', e => {
+            if (e.target.closest('#grid')) e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+
+</html>
