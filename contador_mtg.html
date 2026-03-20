@@ -340,6 +340,27 @@
             border-color: var(--accent);
         }
 
+        .mini-label-input {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid transparent;
+            text-align: center;
+            width: 80%;
+            outline: none;
+            transition: border-color 0.2s, color 0.2s;
+            cursor: text;
+        }
+
+        .mini-label-input:focus {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
         /* poison turns green when >= 10 */
         .poison-critical .mini-val {
             color: #4dff91;
@@ -534,14 +555,33 @@
             { id: 4, name: 'Jugador 4' },
         ];
 
-        // State
-        let state = PLAYERS.map(p => ({
-            id: p.id,
-            name: p.name,
-            life: STARTING_LIFE,
-            poison: 0,
-            commander: 0,
-        }));
+        // State initialization with localStorage
+        const STORAGE_KEY = 'mtg_life_counter_state';
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    console.error("Error loading state", e);
+                }
+            }
+            return PLAYERS.map(p => ({
+                id: p.id,
+                name: p.name,
+                life: STARTING_LIFE,
+                poison: 0,
+                commander: 0,
+                poisonLabel: '☠ Veneno'
+            }));
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        let state = loadState();
 
         // Build UI
         const grid = document.getElementById('grid');
@@ -555,6 +595,7 @@
             el.innerHTML = `
       <div class="player-name-wrap">
         <input class="player-name" type="text" value="${player.name}"
+               placeholder="Jugador ${player.id}"
                maxlength="20" aria-label="Nombre del jugador ${player.id}" />
       </div>
 
@@ -572,7 +613,8 @@
 
       <div class="counters-row">
         <div class="mini-counter" id="poison-wrap-${player.id}">
-          <span class="mini-label">☠ Veneno</span>
+          <input class="mini-label-input" value="${player.poisonLabel || '☠ Veneno'}" 
+                 data-pid="${player.id}" data-type="poisonLabel" maxlength="15" />
           <div class="mini-controls">
             <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1">−</button>
             <span class="mini-val" id="poison-${player.id}">0</span>
@@ -593,7 +635,7 @@
             return el;
         }
 
-        PLAYERS.forEach(p => {
+        state.forEach(p => {
             grid.appendChild(createPlayerCard(p));
         });
 
@@ -659,14 +701,22 @@
                 s[type] = Math.max(0, s[type] + delta);
                 render(pid);
             }
+            saveState();
         });
 
-        // ── Events: name input ───────────────────────────────
+        // ── Events: inputs (names and labels) ────────────────
         grid.addEventListener('input', e => {
-            if (!e.target.classList.contains('player-name')) return;
             const card = e.target.closest('.player');
+            if (!card) return;
             const pid = parseInt(card.dataset.player);
-            state.find(p => p.id === pid).name = e.target.value;
+            const pState = state.find(p => p.id === pid);
+
+            if (e.target.classList.contains('player-name')) {
+                pState.name = e.target.value;
+            } else if (e.target.classList.contains('mini-label-input')) {
+                pState.poisonLabel = e.target.value;
+            }
+            saveState();
         });
 
         // Prevent keyboard from pushing layout on mobile
@@ -698,11 +748,14 @@
                 s.life = STARTING_LIFE;
                 s.poison = 0;
                 s.commander = 0;
-                // Reset name inputs
+                s.poisonLabel = '☠ Veneno';
+                // Reset UI inputs
                 const card = document.getElementById(`player-${s.id}`);
                 card.querySelector('.player-name').value = PLAYERS[i].name;
+                card.querySelector('.mini-label-input').value = '☠ Veneno';
                 s.name = PLAYERS[i].name;
             });
+            saveState();
             renderAll();
             overlay.classList.remove('show');
         });
