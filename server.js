@@ -192,9 +192,9 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`\n⚔  MTG Life Counter Server v2.0.0`);
-    console.log(`   - Puerto: ${PORT}`);
-    console.log(`   - URL: http://localhost:${PORT}`);
+    console.log(`   - Puerto: ${PORT} (0.0.0.0)`);
+    console.log(`   - URL Local: http://localhost:${PORT}`);
     console.log(`   - Estado: Listo para batallas multijugador\n`);
 });
