@@ -30,18 +30,18 @@
             --text-muted: #7a6e5e;
 
             /* Mana colors per player */
-            --p1-accent: #3a7bd5;
-            /* Blue – Island */
-            --p1-glow: #1a4a9a;
-            --p2-accent: #c0392b;
-            /* Red – Mountain */
-            --p2-glow: #7a1a10;
-            --p3-accent: #27ae60;
-            /* Green – Forest */
-            --p3-glow: #145a32;
-            --p4-accent: #8e44ad;
-            /* Purple – Swamp-ish */
-            --p4-glow: #4a1a6a;
+            --p1-accent: #3a7bd5; --p1-glow: #1a4a9a;
+            --p2-accent: #c0392b; --p2-glow: #7a1a10;
+            --p3-accent: #27ae60; --p3-glow: #145a32;
+            --p4-accent: #8e44ad; --p4-glow: #4a1a6a;
+
+            /* Mana themes */
+            --w-mana: #f0f2c0; --w-glow: rgba(240, 242, 192, 0.4);
+            --u-mana: #3a7bd5; --u-glow: rgba(58, 123, 213, 0.4);
+            --b-mana: #222222; --b-glow: rgba(255, 255, 255, 0.15);
+            --r-mana: #c0392b; --r-glow: rgba(192, 57, 43, 0.4);
+            --g-mana: #27ae60; --g-glow: rgba(39, 174, 96, 0.4);
+            --c-mana: #777777; --c-glow: rgba(119, 119, 119, 0.4);
         }
 
         html,
@@ -361,10 +361,231 @@
             border-bottom-color: var(--accent);
         }
 
+        /* ── MANA POOL ──────────────────────────────── */
+        .mana-pool {
+            margin: 8px 0;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .mana-selector-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 6px 16px;
+            color: var(--text-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .mana-selector-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--gold);
+        }
+
+        .mana-dropdown {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(15, 15, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .mana-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .mana-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-mana {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s, box-shadow 0.2s;
+            color: #000;
+            user-select: none;
+        }
+        .btn-mana:active { transform: scale(0.85); }
+        .btn-mana.w { background: var(--w-mana); box-shadow: 0 0 5px var(--w-glow); }
+        .btn-mana.u { background: var(--u-mana); box-shadow: 0 0 5px var(--u-glow); color: #fff; }
+        .btn-mana.b { background: var(--b-mana); box-shadow: 0 0 5px var(--b-glow); color: #fff; border-color: rgba(255,255,255,0.3); }
+        .btn-mana.r { background: var(--r-mana); box-shadow: 0 0 5px var(--r-glow); color: #fff; }
+        .btn-mana.g { background: var(--g-mana); box-shadow: 0 0 5px var(--g-glow); color: #fff; }
+        .btn-mana.c { background: var(--c-mana); box-shadow: 0 0 5px var(--c-glow); color: #fff; }
+
+        .mana-val {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
         /* poison turns green when >= 10 */
         .poison-critical .mini-val {
             color: #4dff91;
             text-shadow: 0 0 8px #00cc55;
+        }
+
+        /* ── COMMANDER ADVANCED ───────────────────────── */
+        .cmdr-adv-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cmdr-adv-btn:hover { color: var(--gold); border-color: var(--gold-dark); }
+
+        .cmdr-details {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(10,10,15,0.95);
+            z-index: 10;
+            padding: 15px;
+            flex-direction: column;
+            gap: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .cmdr-details.show { display: flex; }
+
+        .cmdr-det-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .cmdr-det-title { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold); }
+        .cmdr-close { font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+
+        .cmdr-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .cmdr-dmg-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 5px 8px; border-radius: 6px; }
+        .cmdr-dmg-label { font-size: 0.65rem; color: var(--text-muted); }
+
+        .tax-row { display: flex; align-items: center; justify-content: space-between; background: rgba(201, 168, 76, 0.05); padding: 8px; border-radius: 6px; border: 1px solid rgba(201, 168, 76, 0.1); }
+        .tax-label { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+
+        /* ── LOG PANEL ────────────────────────────────── */
+        #log-overlay {
+            position: fixed; top: 0; right: 0; bottom: 0; width: 300px;
+            background: #0c0c14; border-left: 1px solid rgba(201,168,76,0.2);
+            z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        #log-overlay.show { transform: translateX(0); }
+        .log-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        #log-list { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.75rem; display: flex; flex-direction: column-reverse; gap: 6px; }
+        .log-entry { padding: 6px 8px; border-radius: 4px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--gold-dark); }
+        .log-time { color: var(--text-muted); font-size: 0.6rem; margin-right: 5px; }
+
+        /* ── THEME BUTTON ─────────────────────────────── */
+        .theme-btn { position: absolute; top: 8px; left: 10px; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; z-index: 5; opacity: 0.4; }
+        .theme-btn:hover { opacity: 1; color: var(--gold); }
+
+        /* ── THEMES ───────────────────────────────────── */
+        .player[data-theme="w"] { --accent: var(--w-mana); --glow: var(--w-glow); }
+        .player[data-theme="u"] { --accent: var(--u-mana); --glow: var(--u-glow); }
+        .player[data-theme="b"] { --accent: var(--b-mana); --glow: var(--b-glow); }
+        .player[data-theme="r"] { --accent: var(--r-mana); --glow: var(--r-glow); }
+        .player[data-theme="g"] { --accent: var(--g-mana); --glow: var(--g-glow); }
+        .player[data-theme="c"] { --accent: var(--c-mana); --glow: var(--c-glow); }
+
+        /* ── DEATH OVERLAY (DARK SOULS STYLE) ─────────── */
+        .death-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+        }
+
+        .death-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .death-text {
+            color: #ff0000;
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 1);
+            transform: scale(0.8);
+            transition: transform 3s ease-out;
+            text-align: center;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .death-overlay.show .death-text {
+            transform: scale(1.1);
+            animation: deathShake 0.5s ease-in-out;
+        }
+
+        @keyframes deathShake {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.05) rotate(1deg); }
+            75% { transform: scale(1.05) rotate(-1deg); }
+        }
+
+        .revive-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+        }
+
+        .revive-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            border-color: var(--gold);
         }
 
         /* ── BOTTOM BAR ─────────────────────────────────── */
@@ -529,9 +750,22 @@
             <!-- Players generated by JS -->
         </div>
         <div id="bottom-bar">
-            <span id="title">⚔ MTG Life Counter</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+                <span id="title">⚔ MTG Life Counter</span>
+                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+            </div>
+            <button id="toggle-log" style="background:transparent; color:var(--gold); border:1px solid var(--gold-dark); padding:4px 10px; font-size:0.7rem; border-radius:5px;">📜 LOG</button>
             <button id="reset-btn">↺ Reiniciar</button>
         </div>
+    </div>
+
+    <!-- Log Overlay -->
+    <div id="log-overlay">
+        <div class="log-header">
+            <span style="font-family:'Cinzel'; color:var(--gold);">Historial</span>
+            <span id="close-log" style="cursor:pointer; font-size:1.2rem;">&times;</span>
+        </div>
+        <div id="log-list"></div>
     </div>
 
     <!-- Reset confirmation -->
@@ -560,21 +794,35 @@
 
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
-                    return JSON.parse(saved);
-                } catch (e) {
-                    console.error("Error loading state", e);
-                }
-            }
-            return PLAYERS.map(p => ({
+            const defaults = PLAYERS.map(p => ({
                 id: p.id,
                 name: p.name,
                 life: STARTING_LIFE,
                 poison: 0,
                 commander: 0,
-                poisonLabel: '☠ Veneno'
+                commanderTax: 0,
+                commanderDamage: { 1:0, 2:0, 3:0, 4:0 },
+                mana: { w:0, u:0, b:0, r:0, g:0, c:0 },
+                poisonLabel: '☠ Veneno',
+                theme: 'default'
             }));
+
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Merge parsed with defaults to ensure all fields exist
+                    return parsed.map((p, i) => ({
+                        ...defaults[i],
+                        ...p,
+                        // Deep merge for nested objects if they exist
+                        commanderDamage: { ...defaults[i].commanderDamage, ...(p.commanderDamage || {}) },
+                        mana: { ...defaults[i].mana, ...(p.mana || {}) }
+                    }));
+                } catch (e) {
+                    console.error("Error loading state", e);
+                }
+            }
+            return defaults;
         }
 
         function saveState() {
@@ -582,6 +830,24 @@
         }
 
         let state = loadState();
+        let logData = JSON.parse(localStorage.getItem('mtg_log') || '[]');
+
+        function addToLog(msg) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            logData.push({ time, msg });
+            if (logData.length > 50) logData.shift();
+            localStorage.setItem('mtg_log', JSON.stringify(logData));
+            renderLog();
+        }
+
+        function renderLog() {
+            const list = document.getElementById('log-list');
+            list.innerHTML = logData.map(e => `
+                <div class="log-entry">
+                    <span class="log-time">${e.time}</span> ${e.msg}
+                </div>
+            `).join('');
+        }
 
         // Build UI
         const grid = document.getElementById('grid');
@@ -590,9 +856,24 @@
             const el = document.createElement('div');
             el.className = 'player';
             el.dataset.player = player.id;
+            el.dataset.theme = player.theme || '';
             el.id = `player-${player.id}`;
 
+            // Commander damage matrix
+            const enemies = state.filter(p => p.id !== player.id);
+            const cmdrDmgHtml = enemies.map(e => `
+                <div class="cmdr-dmg-item">
+                    <span class="cmdr-dmg-label" id="cmdr-lbl-${player.id}-${e.id}">VS ${e.name}</span>
+                    <div class="mini-controls">
+                        <button class="btn-mini" data-pid="${player.id}" data-type="cmdrDmg" data-target="${e.id}" data-delta="-1">−</button>
+                        <span class="mini-val" id="cmdr-dmg-${player.id}-${e.id}">${player.commanderDamage[e.id] || 0}</span>
+                        <button class="btn-mini" data-pid="${player.id}" data-type="cmdrDmg" data-target="${e.id}" data-delta="+1">+</button>
+                    </div>
+                </div>
+            `).join('');
+
             el.innerHTML = `
+      <div class="theme-btn" data-pid="${player.id}">🎨</div>
       <div class="player-name-wrap">
         <input class="player-name" type="text" value="${player.name}"
                placeholder="Jugador ${player.id}"
@@ -604,6 +885,18 @@
         <span class="delta" id="delta-${player.id}"></span>
       </div>
 
+      <div class="mana-pool">
+        <button class="mana-selector-btn" data-pid="${player.id}">💎 MANA</button>
+        <div class="mana-dropdown" id="mana-drop-${player.id}">
+            ${['w','u','b','r','g','c'].map(m => `
+                <div class="mana-item">
+                    <button class="btn-mana ${m}" data-pid="${player.id}" data-type="mana" data-color="${m}" data-delta="1">${m.toUpperCase()}</button>
+                    <span class="mana-val" id="mana-${player.id}-${m}">${player.mana[m]}</span>
+                </div>
+            `).join('')}
+        </div>
+      </div>
+
       <div class="btn-row">
         <button class="btn-fast" data-pid="${player.id}" data-delta="-5">−5</button>
         <button class="btn-main" data-pid="${player.id}" data-delta="-1">−</button>
@@ -612,23 +905,47 @@
       </div>
 
       <div class="counters-row">
-        <div class="mini-counter" id="poison-wrap-${player.id}">
+        <!-- Contador de veneno oculto internamente -->
+        <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
           <input class="mini-label-input" value="${player.poisonLabel || '☠ Veneno'}" 
                  data-pid="${player.id}" data-type="poisonLabel" maxlength="15" />
           <div class="mini-controls">
             <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1">−</button>
-            <span class="mini-val" id="poison-${player.id}">0</span>
+            <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
             <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1">+</button>
           </div>
         </div>
-        <div class="mini-counter">
-          <span class="mini-label">⚔ Cmdr</span>
+
+        <div class="mini-counter" id="tax-wrap-${player.id}">
+          <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
           <div class="mini-controls">
-            <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="-1">−</button>
-            <span class="mini-val" id="cmdr-${player.id}">0</span>
-            <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="+1">+</button>
+            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1">−</button>
+            <span class="mini-val" id="tax-${player.id}">${player.commanderTax}</span>
+            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1">+</button>
           </div>
         </div>
+
+        <div class="mini-counter">
+          <button class="cmdr-adv-btn" data-pid="${player.id}">⚔ Comandante</button>
+        </div>
+      </div>
+
+      <!-- Advanced Commander UI -->
+      <div class="cmdr-details" id="cmdr-det-${player.id}">
+        <div class="cmdr-det-header">
+            <span class="cmdr-det-title">Stats de Comandante</span>
+            <span class="cmdr-close">&times;</span>
+        </div>
+
+        <div class="cmdr-det-title" style="font-size:0.6rem; margin-top:5px;">Daño Recibido De</div>
+        <div class="cmdr-matrix">
+            ${cmdrDmgHtml}
+        </div>
+      </div>
+
+      <div class="death-overlay" id="death-${player.id}">
+        <div class="death-text">HAS MUERTO</div>
+        <button class="revive-btn" data-pid="${player.id}">Reiniciar Jugador</button>
       </div>
     `;
 
@@ -640,23 +957,26 @@
         });
 
         // ── Render ───────────────────────────────────────────
-        function render(id, delta) {
+        function render(id, delta, logMsg) {
             const s = state.find(p => p.id === id);
             const lifeEl = document.getElementById(`life-${id}`);
             const deltaEl = document.getElementById(`delta-${id}`);
             const poisonEl = document.getElementById(`poison-${id}`);
-            const cmdrEl = document.getElementById(`cmdr-${id}`);
             const poisonWrap = document.getElementById(`poison-wrap-${id}`);
             const card = document.getElementById(`player-${id}`);
+            const taxEl = document.getElementById(`tax-${id}`);
+
+            // New fields
+            card.dataset.theme = s.theme || '';
 
             // Life number
-            lifeEl.childNodes[0].textContent = s.life;
+            if (lifeEl) lifeEl.childNodes[0].textContent = s.life;
 
             // Danger mode
             card.classList.toggle('danger', s.life <= 5);
 
             // Delta badge
-            if (delta !== undefined) {
+            if (delta !== undefined && deltaEl) {
                 deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
                 deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
                 clearTimeout(deltaEl._timeout);
@@ -666,20 +986,55 @@
             }
 
             // Bump animation
-            lifeEl.classList.remove('bump');
-            void lifeEl.offsetWidth; // reflow
-            lifeEl.classList.add('bump');
-            clearTimeout(lifeEl._bumpTimeout);
-            lifeEl._bumpTimeout = setTimeout(() => lifeEl.classList.remove('bump'), 120);
+            if (lifeEl) {
+                lifeEl.classList.remove('bump');
+                void lifeEl.offsetWidth; // reflow
+                lifeEl.classList.add('bump');
+                clearTimeout(lifeEl._bumpTimeout);
+                lifeEl._bumpTimeout = setTimeout(() => lifeEl.classList.remove('bump'), 120);
+            }
 
             // Mini counters
-            poisonEl.textContent = s.poison;
-            cmdrEl.textContent = s.commander;
-            poisonWrap.classList.toggle('poison-critical', s.poison >= 10);
+            if (poisonEl) poisonEl.textContent = s.poison;
+            if (poisonWrap) poisonWrap.classList.toggle('poison-critical', s.poison >= 10);
+            if (taxEl) taxEl.textContent = s.commanderTax || 0;
+
+            // Death detection
+            const hasLostByLife = s.life <= 0;
+            const hasLostByCmdr = Object.values(s.commanderDamage).some(v => v >= 21);
+            const isDead = hasLostByLife || hasLostByCmdr;
+            const deathOverlay = document.getElementById(`death-${id}`);
+            if (deathOverlay) {
+                const alreadyDead = deathOverlay.classList.contains('show');
+                if (isDead && !alreadyDead) {
+                    const reason = hasLostByLife ? 'Vida 0' : 'Daño Cmdr 21+';
+                    addToLog(`💀 ${s.name} HA MUERTO (${reason})`);
+                }
+                deathOverlay.classList.toggle('show', isDead);
+            }
+
+            // Mana
+            ['w','u','b','r','g','c'].forEach(m => {
+                const mel = document.getElementById(`mana-${id}-${m}`);
+                if (mel) mel.textContent = s.mana[m];
+            });
+
+            // Update opponent labels (Name Sync) and damage values
+            state.forEach(other => {
+                if (other.id === id) return;
+                const lbl = document.getElementById(`cmdr-lbl-${id}-${other.id}`);
+                if (lbl) lbl.textContent = `VS ${other.name}`;
+                
+                const dmgEl = document.getElementById(`cmdr-dmg-${id}-${other.id}`);
+                if (dmgEl) dmgEl.textContent = s.commanderDamage[other.id] || 0;
+            });
+
+            if (logMsg) addToLog(logMsg);
         }
 
         function renderAll() {
             state.forEach(s => render(s.id));
+            renderLog();
         }
 
         // ── Events: life buttons ─────────────────────────────
@@ -688,20 +1043,84 @@
             if (!btn) return;
 
             const pid = parseInt(btn.dataset.pid);
-            const type = btn.dataset.type; // undefined | poison | commander
+            const type = btn.dataset.type; // undefined | poison | tax | mana | cmdrDmg
             const delta = parseInt(btn.dataset.delta);
             const s = state.find(p => p.id === pid);
+            let logMsg = '';
 
             if (!type) {
                 // Main life buttons
                 s.life = Math.max(-999, s.life + delta);
-                render(pid, delta);
-            } else {
-                // Mini counters
-                s[type] = Math.max(0, s[type] + delta);
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Vida`;
+                render(pid, delta, logMsg);
+            } else if (type === 'mana') {
+                const color = btn.dataset.color;
+                s.mana[color] = Math.max(0, s.mana[color] + delta);
+                // No log for every single mana click to avoid spam? 
+                // Or maybe just small log? Let's skip mana log for now unless requested.
                 render(pid);
+            } else if (type === 'cmdrDmg') {
+                const target = btn.dataset.target;
+                const other = state.find(p => p.id == target);
+                s.commanderDamage[target] = Math.max(0, s.commanderDamage[target] + delta);
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Daño Cmdr de ${other ? other.name : 'P'+target}`;
+                render(pid, 0, logMsg);
+            } else if (type === 'tax') {
+                s.commanderTax = Math.max(0, s.commanderTax + delta);
+                logMsg = `${s.name}: Muertes Cmdr ${delta > 0 ? '+1' : '-1'}`;
+                render(pid, 0, logMsg);
+            } else {
+                // Poison
+                s[type] = Math.max(0, s[type] + delta);
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} ${s.poisonLabel}`;
+                render(pid, 0, logMsg);
             }
             saveState();
+        });
+
+        // ── Events: UI Interactions (Log, Themes, Cmdr Adv) ────
+        document.getElementById('toggle-log').addEventListener('click', () => {
+            document.getElementById('log-overlay').classList.add('show');
+        });
+        document.getElementById('close-log').addEventListener('click', () => {
+            document.getElementById('log-overlay').classList.remove('show');
+        });
+
+        grid.addEventListener('click', e => {
+            // Mana selector toggle
+            if (e.target.classList.contains('mana-selector-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                const dropdown = document.getElementById(`mana-drop-${pid}`);
+                // Close others
+                document.querySelectorAll('.mana-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                dropdown.classList.toggle('show');
+                return;
+            }
+
+            // Theme picker
+            if (e.target.classList.contains('theme-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                const s = state.find(p => p.id === pid);
+                const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
+                const idx = themes.indexOf(s.theme || 'default');
+                s.theme = themes[(idx + 1) % themes.length];
+                render(pid);
+                saveState();
+                return;
+            }
+
+            // Commander advanced UI toggle
+            if (e.target.classList.contains('cmdr-adv-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                document.getElementById(`cmdr-det-${pid}`).classList.add('show');
+                return;
+            }
+            if (e.target.classList.contains('cmdr-close')) {
+                e.target.closest('.cmdr-details').classList.remove('show');
+                return;
+            }
         });
 
         // ── Events: inputs (names and labels) ────────────────
@@ -713,10 +1132,45 @@
 
             if (e.target.classList.contains('player-name')) {
                 pState.name = e.target.value;
+                // Al cambiar el nombre, actualizamos los labels en todos los jugadores
+                renderAll(); 
             } else if (e.target.classList.contains('mini-label-input')) {
                 pState.poisonLabel = e.target.value;
             }
             saveState();
+        });
+
+        // Close dropdowns clicking outside
+        window.addEventListener('click', e => {
+            if (!e.target.closest('.mana-pool')) {
+                document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
+            }
+            
+            // Revive / Reset individual player
+            if (e.target.classList.contains('revive-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                const s = state.find(p => p.id === pid);
+                s.life = STARTING_LIFE;
+                s.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
+                // Also reset poison if needed (though hidden)
+                s.poison = 0;
+                render(pid);
+                saveState();
+            }
+        });
+
+        // Right click mana to subtract
+        grid.addEventListener('contextmenu', e => {
+            const btn = e.target.closest('.btn-mana');
+            if (btn) {
+                e.preventDefault();
+                const pid = parseInt(btn.dataset.pid);
+                const color = btn.dataset.color;
+                const s = state.find(p => p.id === pid);
+                s.mana[color] = Math.max(0, s.mana[color] - 1);
+                render(pid);
+                saveState();
+            }
         });
 
         // Prevent keyboard from pushing layout on mobile
@@ -748,13 +1202,20 @@
                 s.life = STARTING_LIFE;
                 s.poison = 0;
                 s.commander = 0;
+                s.commanderTax = 0;
+                s.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
+                s.mana = { w:0, u:0, b:0, r:0, g:0, c:0 };
                 s.poisonLabel = '☠ Veneno';
+                s.theme = 'default';
+
                 // Reset UI inputs
                 const card = document.getElementById(`player-${s.id}`);
                 card.querySelector('.player-name').value = PLAYERS[i].name;
                 card.querySelector('.mini-label-input').value = '☠ Veneno';
                 s.name = PLAYERS[i].name;
             });
+            logData = [];
+            localStorage.setItem('mtg_log', '[]');
             saveState();
             renderAll();
             overlay.classList.remove('show');

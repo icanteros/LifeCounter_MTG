@@ -20,3 +20,11 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+test_results.*
+
+# Otros
+*.log
+.temp/
+.cache/
+.env*
+! .env.example
