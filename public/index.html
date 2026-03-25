@@ -20,6 +20,15 @@
             --bg-card: #14141f;
             --text-primary: #f0e8d5;
             --text-muted: #7a6e5e;
+
+            /* Mana themes */
+            --w-mana: #f0f2c0; --w-glow: rgba(240, 242, 192, 0.4);
+            --u-mana: #3a7bd5; --u-glow: rgba(58, 123, 213, 0.4);
+            --b-mana: #222222; --b-glow: rgba(255, 255, 255, 0.15);
+            --r-mana: #c0392b; --r-glow: rgba(192, 57, 43, 0.4);
+            --g-mana: #27ae60; --g-glow: rgba(39, 174, 96, 0.4);
+            --c-mana: #777777; --c-glow: rgba(119, 119, 119, 0.4);
+
             --p1-accent: #3a7bd5; --p1-glow: #1a4a9a;
             --p2-accent: #c0392b; --p2-glow: #7a1a10;
             --p3-accent: #27ae60; --p3-glow: #145a32;
@@ -314,11 +323,24 @@
             border-radius: 50%;
             background: #3d3d3d;
             transition: background 0.4s, box-shadow 0.4s;
+            z-index: 5;
         }
         .conn-badge.online {
             background: #4dff91;
             box-shadow: 0 0 8px #00cc55;
         }
+
+        /* THEME BUTTON */
+        .theme-btn { position: absolute; top: 8px; left: 10px; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; z-index: 5; opacity: 0.4; }
+        .theme-btn:hover { opacity: 1; color: var(--gold); }
+
+        /* THEMES */
+        .player[data-theme="w"] { --accent: var(--w-mana); --glow: var(--w-glow); }
+        .player[data-theme="u"] { --accent: var(--u-mana); --glow: var(--u-glow); }
+        .player[data-theme="b"] { --accent: var(--b-mana); --glow: var(--b-glow); }
+        .player[data-theme="r"] { --accent: var(--r-mana); --glow: var(--r-glow); }
+        .player[data-theme="g"] { --accent: var(--g-mana); --glow: var(--g-glow); }
+        .player[data-theme="c"] { --accent: var(--c-mana); --glow: var(--c-glow); }
 
         .player-name-wrap {
             display: flex; align-items: center;
@@ -424,7 +446,85 @@
         }
         .btn-mini:hover { color: var(--accent); border-color: var(--accent); }
 
+        .mini-label-input {
+            font-family: 'Rajdhani', sans-serif; font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+            text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);
+            background: transparent; border: none; border-bottom: 1px solid transparent;
+            text-align: center; width: 80%; outline: none; transition: border-color 0.2s, color 0.2s;
+        }
+        .mini-label-input:focus { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* MANA POOL */
+        .mana-pool { margin: 8px 0; display: flex; justify-content: center; position: relative; }
+        .mana-selector-btn {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px; padding: 6px 16px; color: var(--text-primary);
+            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .mana-selector-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
+        
+        .mana-dropdown {
+            position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid var(--gold); border-radius: 12px; padding: 10px;
+            display: flex; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 100;
+        }
+        .mana-dropdown.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .mana-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .btn-mana {
+            width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+            font-weight: 900; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s; color: #000;
+        }
+        .btn-mana.w { background: var(--w-mana); }
+        .btn-mana.u { background: var(--u-mana); color: #fff; }
+        .btn-mana.b { background: var(--b-mana); color: #fff; }
+        .btn-mana.r { background: var(--r-mana); color: #fff; }
+        .btn-mana.g { background: var(--g-mana); color: #fff; }
+        .btn-mana.c { background: var(--c-mana); color: #fff; }
+        .mana-val { font-size: 0.75rem; font-weight: 700; color: var(--text-primary); }
+
         .poison-critical .mini-val { color: #4dff91; text-shadow: 0 0 8px #00cc55; }
+
+        /* COMMANDER ADVANCED */
+        .cmdr-adv-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); font-size: 0.6rem; padding: 2px 8px; border-radius: 4px;
+            margin-top: 4px; text-transform: uppercase;
+        }
+        .cmdr-details {
+            display: none; position: absolute; inset: 0; background: rgba(10,10,15,0.95);
+            z-index: 10; padding: 15px; flex-direction: column; gap: 12px; border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .cmdr-details.show { display: flex; }
+        .cmdr-det-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .cmdr-det-title { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold); }
+        .cmdr-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .cmdr-dmg-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 5px 8px; border-radius: 6px; }
+        .cmdr-dmg-label { font-size: 0.65rem; color: var(--text-muted); }
+        .tax-row { display: flex; align-items: center; justify-content: space-between; background: rgba(201, 168, 76, 0.05); padding: 8px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.1); }
+        .tax-label { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+
+        /* DEATH OVERLAY */
+        .death-overlay {
+            position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 50; opacity: 0; visibility: hidden; transition: all 0.5s ease;
+            backdrop-filter: blur(4px); border-radius: 20px;
+        }
+        .death-overlay.show { opacity: 1; visibility: visible; }
+        .death-text {
+            color: #ff0000; font-family: 'Cinzel', serif; font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 700; letter-spacing: 0.25em; text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+            text-align: center; line-height: 1;
+        }
+        .revive-btn {
+            margin-top: 20px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4); padding: 5px 15px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; text-transform: uppercase;
+        }
 
         /* ── BOTTOM BAR ─────────────────────────────────────── */
         #bottom-bar {
@@ -585,7 +685,10 @@
     <div id="app">
         <div id="grid"><!-- Players generated by JS --></div>
         <div id="bottom-bar">
-            <span id="title">⚔ MTG Life Counter</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+                <span id="title">⚔ MTG Life Counter</span>
+                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+            </div>
             <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
             <button id="reset-btn">↺ Reiniciar</button>
         </div>
@@ -745,27 +848,46 @@
         el.className = 'player';
         el.dataset.player = player.id;
         el.id = `player-${player.id}`;
-        const isMe = player.id === mySlot;
+        const isMe = (player.id === mySlot);
 
         el.innerHTML = `
+            <div class="theme-btn" data-pid="${player.id}">🎨</div>
             <span class="conn-badge ${player.connected ? 'online' : ''}" id="conn-${player.id}"></span>
+            
             <div class="player-name-wrap">
-                <input class="player-name" type="text" value="${escHtml(player.name)}"
-                       maxlength="20" aria-label="Nombre jugador ${player.id}"
-                       ${isMe ? '' : 'disabled'} />
+                <input type="text" class="player-name" value="${escHtml(player.name)}" 
+                       ${isMe ? '' : 'disabled'} maxlength="16" />
             </div>
+
             <div class="life-display" id="life-${player.id}">
                 ${player.life}
-                <span class="delta" id="delta-${player.id}"></span>
+                <div class="delta" id="delta-${player.id}"></div>
             </div>
+
             <div class="btn-row">
-                <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${isMe ? '' : 'disabled'}>−5</button>
-                <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${isMe ? '' : 'disabled'}>-5</button>
+                <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
                 <button class="btn-main" data-pid="${player.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
                 <button class="btn-fast" data-pid="${player.id}" data-delta="+5" ${isMe ? '' : 'disabled'}>+5</button>
             </div>
+
+            <div class="mana-pool">
+                <button class="mana-selector-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>
+                    💎 MANA
+                </button>
+                <div class="mana-dropdown" id="mana-drop-${player.id}">
+                    ${['w','u','b','r','g','c'].map(c => `
+                        <div class="mana-item">
+                            <button class="btn-mana btn-mini ${c}" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1" ${isMe ? '' : 'disabled'}>
+                                ${c.toUpperCase()}
+                            </button>
+                            <span class="mana-val" id="mana-${player.id}-${c}">${player.mana ? player.mana[c] : 0}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
             <div class="counters-row">
-                <div class="mini-counter" id="poison-wrap-${player.id}">
                     <span class="mini-label">☠ Veneno</span>
                     <div class="mini-controls">
                         <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
@@ -794,78 +916,156 @@
     // ─────────────────────────────────────────────
     // GAME STATE UPDATE (from server)
     // ─────────────────────────────────────────────
-    socket.on('game_state', ({ players }) => {
-        players.forEach(p => updatePlayerUI(p));
-    });
-
     const prevLife = {};
+    const ALL_PLAYERS = [1, 2, 3, 4];
 
-    function updatePlayerUI(p) {
+    function updatePlayerUI(p, players) {
         const lifeEl    = document.getElementById(`life-${p.id}`);
         const deltaEl   = document.getElementById(`delta-${p.id}`);
         const poisonEl  = document.getElementById(`poison-${p.id}`);
-        const cmdrEl    = document.getElementById(`cmdr-${p.id}`);
+        const taxEl     = document.getElementById(`tax-${p.id}`);
         const poisonWrap= document.getElementById(`poison-wrap-${p.id}`);
         const card      = document.getElementById(`player-${p.id}`);
         const connBadge = document.getElementById(`conn-${p.id}`);
         const nameInput = card ? card.querySelector('.player-name') : null;
+        const poisonLabelInput = document.getElementById(`label-poison-${p.id}`);
+        const deathOverlay = document.getElementById(`death-${p.id}`);
 
         if (!lifeEl) return;
 
-        // Life number
+        // Theme and Connection
+        card.dataset.theme = p.theme || 'default';
+        card.classList.toggle('danger', p.life <= 5);
+        card.classList.toggle('disconnected', !p.connected);
+        if (connBadge) connBadge.classList.toggle('online', p.connected);
+
+        // Life and Delta
         const oldLife = prevLife[p.id];
         const delta = (oldLife !== undefined) ? (p.life - oldLife) : undefined;
         prevLife[p.id] = p.life;
         lifeEl.childNodes[0].textContent = p.life;
 
-        // Danger
-        card.classList.toggle('danger', p.life <= 5);
-        card.classList.toggle('disconnected', !p.connected);
-
-        // Delta badge
         if (delta !== undefined && delta !== 0) {
             deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
             deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
             clearTimeout(deltaEl._t);
             deltaEl._t = setTimeout(() => deltaEl.classList.remove('show'), 1200);
+            
+            lifeEl.classList.remove('bump');
+            void lifeEl.offsetWidth;
+            lifeEl.classList.add('bump');
         }
 
-        // Bump
-        lifeEl.classList.remove('bump');
-        void lifeEl.offsetWidth;
-        if (delta !== 0) lifeEl.classList.add('bump');
-        clearTimeout(lifeEl._bt);
-        lifeEl._bt = setTimeout(() => lifeEl.classList.remove('bump'), 120);
+        // Mana
+        ['w','u','b','r','g','c'].forEach(c => {
+            const mEl = document.getElementById(`mana-${p.id}-${c}`);
+            if (mEl) mEl.textContent = p.mana ? p.mana[c] : 0;
+        });
 
         // Mini counters
-        poisonEl.textContent  = p.poison;
-        cmdrEl.textContent    = p.commander;
-        poisonWrap.classList.toggle('poison-critical', p.poison >= 10);
+        if (poisonEl) poisonEl.textContent = p.poison;
+        if (taxEl) taxEl.textContent = p.commanderTax || 0;
+        if (poisonWrap) poisonWrap.classList.toggle('poison-critical', p.poison >= 10);
 
-        // Name (only update if not focused by this user)
-        if (nameInput && document.activeElement !== nameInput) {
-            nameInput.value = p.name;
+        // Name and Poison Label
+        if (nameInput && document.activeElement !== nameInput) nameInput.value = p.name;
+        if (poisonLabelInput && document.activeElement !== poisonLabelInput) poisonLabelInput.value = p.poisonLabel || '☠ Veneno';
+
+        // Death logic
+        const hasLostByLife = p.life <= 0;
+        const hasLostByCmdr = Object.values(p.commanderDamage || {}).some(v => v >= 21);
+        if (deathOverlay) deathOverlay.classList.toggle('show', hasLostByLife || hasLostByCmdr);
+
+        // Commander Matrix
+        const matrix = document.getElementById(`cmdr-matrix-${p.id}`);
+        if (matrix) {
+            const isMe = p.id === mySlot;
+            matrix.innerHTML = players.filter(other => other.id !== p.id).map(other => `
+                <div class="cmdr-dmg-item">
+                    <span class="cmdr-dmg-label">VS ${escHtml(other.name)}</span>
+                    <div class="mini-controls">
+                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                        <span class="mini-val">${p.commanderDamage ? (p.commanderDamage[other.id] || 0) : 0}</span>
+                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                    </div>
+                </div>
+            `).join('');
         }
-
-        // Connection badge
-        if (connBadge) connBadge.classList.toggle('online', p.connected);
     }
+
+    socket.on('game_state', ({ players }) => {
+        players.forEach(p => updatePlayerUI(p, players));
+    });
 
     // ─────────────────────────────────────────────
     // EVENTS: life buttons
     // ─────────────────────────────────────────────
     grid.addEventListener('click', e => {
-        const btn = e.target.closest('button[data-delta]');
+        const btn = e.target.closest('button');
         if (!btn || btn.disabled) return;
 
-        const pid   = parseInt(btn.dataset.pid);
-        const type  = btn.dataset.type;
+        const pid = parseInt(btn.dataset.pid);
+        const type = btn.dataset.type;
         const delta = parseInt(btn.dataset.delta);
+        const target = btn.dataset.target;
+        const color = btn.dataset.color;
 
-        if (!type) {
+        // Mana dropdown toggle
+        if (btn.classList.contains('mana-selector-btn')) {
+            const drop = document.getElementById(`mana-drop-${pid}`);
+            document.querySelectorAll('.mana-dropdown').forEach(d => { if(d !== drop) d.classList.remove('show'); });
+            drop.classList.toggle('show');
+            return;
+        }
+
+        // Commander detail toggle
+        if (btn.classList.contains('cmdr-adv-btn')) {
+            document.getElementById(`cmdr-det-${pid}`).classList.add('show');
+            return;
+        }
+        if (btn.classList.contains('cmdr-close')) {
+            document.getElementById(`cmdr-det-${pid}`).classList.remove('show');
+            return;
+        }
+
+        // Theme picker
+        if (btn.classList.contains('theme-btn')) {
+            const card = document.getElementById(`player-${pid}`);
+            const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
+            const current = card.dataset.theme || 'default';
+            const next = themes[(themes.indexOf(current) + 1) % themes.length];
+            socket.emit('counter_change', { pid, type: 'theme', label: next });
+            return;
+        }
+
+        // Revive
+        if (btn.classList.contains('revive-btn')) {
+            socket.emit('reset_game'); // O podríamos hacer un reset individual si el server lo soporta
+            return;
+        }
+
+        if (!type && delta) {
             socket.emit('life_change', { pid, delta });
-        } else {
-            socket.emit('counter_change', { pid, type, delta });
+        } else if (type) {
+            socket.emit('counter_change', { pid, type, delta, color, target });
+        }
+    });
+
+    // Close mana dropdowns clicking outside
+    window.addEventListener('click', e => {
+        if (!e.target.closest('.mana-pool')) {
+            document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
+        }
+    });
+
+    // Right click mana to subtract
+    grid.addEventListener('contextmenu', e => {
+        const btn = e.target.closest('.btn-mana');
+        if (btn && !btn.disabled) {
+            e.preventDefault();
+            const pid = parseInt(btn.dataset.pid);
+            const color = btn.dataset.color;
+            socket.emit('counter_change', { pid, type: 'mana', color, delta: -1 });
         }
     });
 
@@ -873,11 +1073,12 @@
     // EVENTS: name input
     // ─────────────────────────────────────────────
     grid.addEventListener('input', e => {
-        if (!e.target.classList.contains('player-name')) return;
-        if (e.target.disabled) return;
-        const card = e.target.closest('.player');
-        const pid  = parseInt(card.dataset.player);
-        socket.emit('name_change', { pid, name: e.target.value });
+        const pid = parseInt(e.target.closest('.player').dataset.player);
+        if (e.target.classList.contains('player-name')) {
+            socket.emit('name_change', { pid, name: e.target.value });
+        } else if (e.target.classList.contains('mini-label-input')) {
+            socket.emit('counter_change', { pid, type: 'poisonLabel', label: e.target.value });
+        }
     });
 
     // ─────────────────────────────────────────────

@@ -21,7 +21,11 @@ function createRoomState() {
         name: `Jugador ${id}`,
         life: STARTING_LIFE,
         poison: 0,
-        commander: 0,
+        poisonLabel: '☠ Veneno',
+        commanderTax: 0,
+        commanderDamage: { 1:0, 2:0, 3:0, 4:0 },
+        mana: { w:0, u:0, b:0, r:0, g:0, c:0 },
+        theme: 'default',
         connected: false,
     }));
 }
@@ -103,14 +107,27 @@ io.on('connection', (socket) => {
         io.to(socket.data.roomCode).emit('game_state', { players: room.players });
     });
 
-    // Mini counter change (poison / commander)
-    socket.on('counter_change', ({ pid, type, delta }) => {
+    // Generic counter change
+    socket.on('counter_change', ({ pid, type, delta, color, target, label }) => {
         const room = rooms.get(socket.data.roomCode);
         if (!room) return;
-        const player = room.players.find(p => p.id === pid);
-        if (!player) return;
-        if (type !== 'poison' && type !== 'commander') return;
-        player[type] = Math.max(0, player[type] + delta);
+        const p = room.players.find(p => p.id === pid);
+        if (!p) return;
+
+        if (type === 'mana' && color) {
+            p.mana[color] = Math.max(0, p.mana[color] + delta);
+        } else if (type === 'cmdrDmg' && target) {
+            p.commanderDamage[target] = Math.max(0, p.commanderDamage[target] + delta);
+        } else if (type === 'tax') {
+            p.commanderTax = Math.max(0, p.commanderTax + delta);
+        } else if (type === 'poison') {
+            p.poison = Math.max(0, p.poison + delta);
+        } else if (type === 'poisonLabel') {
+            p.poisonLabel = label;
+        } else if (type === 'theme') {
+            p.theme = label; // Usamos label como valor de tema
+        }
+        
         io.to(socket.data.roomCode).emit('game_state', { players: room.players });
     });
 
@@ -131,7 +148,11 @@ io.on('connection', (socket) => {
         room.players.forEach((p, i) => {
             p.life = STARTING_LIFE;
             p.poison = 0;
-            p.commander = 0;
+            p.poisonLabel = '☠ Veneno';
+            p.commanderTax = 0;
+            p.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
+            p.mana = { w:0, u:0, b:0, r:0, g:0, c:0 };
+            p.theme = 'default';
             p.name = `Jugador ${p.id}`;
         });
         io.to(socket.data.roomCode).emit('game_state', { players: room.players });

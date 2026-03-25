@@ -28,3 +28,7 @@ test_results.*
 .cache/
 .env*
 ! .env.example
+# Despliegue
+.vercel/
+.netlify/
+.serverpress/
