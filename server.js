@@ -11,6 +11,15 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 const STARTING_LIFE = 40;
 
+// Global Error Handlers (Helpful for Railway Debugging)
+process.on('uncaughtException', (err) => {
+    console.error('💥 FATAL ERROR (Uncaught Exception):', err);
+    process.exit(1);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 UNHANDLED REJECTION:', reason);
+});
+
 // ── Rooms state ────────────────────────────────────────────────────────────
 // Map<roomCode, { players: [...], sockets: Set<socketId> }>
 const rooms = new Map();
@@ -184,6 +193,8 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`\n⚔  MTG Life Counter Server`);
-    console.log(`   Corriendo en http://localhost:${PORT}\n`);
+    console.log(`\n⚔  MTG Life Counter Server v2.0.0`);
+    console.log(`   - Puerto: ${PORT}`);
+    console.log(`   - URL: http://localhost:${PORT}`);
+    console.log(`   - Estado: Listo para batallas multijugador\n`);
 });

@@ -1,6 +1,9 @@
 {
   "name": "mtg-life-counter-multiplayer",
   "version": "2.0.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "description": "MTG Life Counter — Multiplayer en tiempo real",
   "main": "server.js",
   "scripts": {

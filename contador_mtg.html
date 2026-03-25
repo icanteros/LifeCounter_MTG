@@ -362,94 +362,41 @@
         }
 
         /* ── MANA POOL ──────────────────────────────── */
-        .mana-pool {
-            margin: 8px 0;
-            display: flex;
-            justify-content: center;
-            position: relative;
-        }
-
+        .mana-pool { margin: 8px 0; display: flex; justify-content: center; position: relative; }
         .mana-selector-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 6px 16px;
-            color: var(--text-primary);
-            font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px; padding: 6px 16px; color: var(--text-primary);
+            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
             user-select: none;
         }
-
-        .mana-selector-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--gold);
-        }
-
+        .mana-selector-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
+        
         .mana-dropdown {
-            position: absolute;
-            bottom: 110%;
-            left: 50%;
-            transform: translateX(-50%) translateY(10px);
-            background: rgba(15, 15, 20, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--gold);
-            border-radius: 12px;
-            padding: 10px;
-            display: flex;
-            gap: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s;
-            z-index: 100;
+            display: none; position: absolute; inset: 0; background: rgba(10,10,15,0.98);
+            z-index: 100; padding: 10px; flex-direction: column; gap: 8px;
+            border-radius: 12px; backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; border: 1px solid var(--gold);
         }
-
-        .mana-dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .mana-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
+        .mana-dropdown.show { display: flex; }
+        .mana-drop-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
+        .mana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        .mana-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 8px; width: 100%; }
+        .mana-symbol-wrap { display: flex; align-items: center; gap: 8px; }
         .btn-mana {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-weight: 900;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s, box-shadow 0.2s;
+            width: 24px; height: 24px; border-radius: 50%; border: none;
+            font-weight: 900; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
             color: #000;
-            user-select: none;
         }
-        .btn-mana:active { transform: scale(0.85); }
-        .btn-mana.w { background: var(--w-mana); box-shadow: 0 0 5px var(--w-glow); }
-        .btn-mana.u { background: var(--u-mana); box-shadow: 0 0 5px var(--u-glow); color: #fff; }
-        .btn-mana.b { background: var(--b-mana); box-shadow: 0 0 5px var(--b-glow); color: #fff; border-color: rgba(255,255,255,0.3); }
-        .btn-mana.r { background: var(--r-mana); box-shadow: 0 0 5px var(--r-glow); color: #fff; }
-        .btn-mana.g { background: var(--g-mana); box-shadow: 0 0 5px var(--g-glow); color: #fff; }
-        .btn-mana.c { background: var(--c-mana); box-shadow: 0 0 5px var(--c-glow); color: #fff; }
-
-        .mana-val {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
+        .btn-mana.w { background: var(--w-mana); }
+        .btn-mana.u { background: var(--u-mana); color: #fff; }
+        .btn-mana.b { background: var(--b-mana); color: #fff; }
+        .btn-mana.r { background: var(--r-mana); color: #fff; }
+        .btn-mana.g { background: var(--g-mana); color: #fff; }
+        .btn-mana.c { background: var(--c-mana); color: #fff; }
+        .mana-val { font-size: 0.9rem; font-weight: 700; color: var(--gold); min-width: 15px; text-align: center; }
+        .mana-ctrls { display: flex; gap: 4px; }
+        .mana-close { color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
 
         /* poison turns green when >= 10 */
         .poison-critical .mini-val {
@@ -902,6 +849,28 @@
         <button class="btn-main" data-pid="${player.id}" data-delta="-1">−</button>
         <button class="btn-main" data-pid="${player.id}" data-delta="+1">+</button>
         <button class="btn-fast" data-pid="${player.id}" data-delta="+5">+5</button>
+      <div class="mana-pool">
+        <button class="mana-selector-btn" data-pid="${player.id}">💎 MANA</button>
+        <div class="mana-dropdown" id="mana-drop-${player.id}">
+          <div class="mana-drop-header">
+            <span class="cmdr-det-title">Reserva de Maná</span>
+            <span class="mana-close" data-pid="${player.id}">&times;</span>
+          </div>
+          <div class="mana-grid">
+            ${['w','u','b','r','g','c'].map(c => `
+              <div class="mana-item">
+                <div class="mana-symbol-wrap">
+                  <div class="btn-mana ${c}">${c.toUpperCase()}</div>
+                  <span class="mana-val" id="mana-${player.id}-${c}">${player.mana[c]}</span>
+                </div>
+                <div class="mana-ctrls">
+                  <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1">−</button>
+                  <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1">+</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
       </div>
 
       <div class="counters-row">
@@ -968,6 +937,28 @@
 
             // New fields
             card.dataset.theme = s.theme || '';
+
+            // Update Mana values
+            ['w','u','b','r','g','c'].forEach(color => {
+                const mEl = document.getElementById(`mana-${id}-${color}`);
+                if (mEl) mEl.textContent = s.mana[color];
+            });
+
+            // Update Commander Damage matrix
+            const matrix = document.querySelector(`#cmdr-det-${id} .mana-grid`); // Reusing mana-grid class for layout
+            const matrixContainer = document.querySelector(`#cmdr-det-${id} .cmdr-matrix`);
+            if (matrixContainer) {
+                matrixContainer.innerHTML = state.filter(other => other.id !== id).map(other => `
+                    <div class="cmdr-dmg-item">
+                        <span class="cmdr-dmg-label">VS ${other.name}</span>
+                        <div class="mini-controls">
+                            <button class="btn-mini" data-pid="${id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="-1">−</button>
+                            <span class="mini-val">${s.commanderDamage[other.id] || 0}</span>
+                            <button class="btn-mini" data-pid="${id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="+1">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
             // Life number
             if (lifeEl) lifeEl.childNodes[0].textContent = s.life;
@@ -1091,11 +1082,15 @@
             if (e.target.classList.contains('mana-selector-btn')) {
                 const pid = parseInt(e.target.dataset.pid);
                 const dropdown = document.getElementById(`mana-drop-${pid}`);
-                // Close others
                 document.querySelectorAll('.mana-dropdown').forEach(d => {
                     if (d !== dropdown) d.classList.remove('show');
                 });
-                dropdown.classList.toggle('show');
+                dropdown.classList.add('show');
+                return;
+            }
+            if (e.target.classList.contains('mana-close')) {
+                const pid = parseInt(e.target.dataset.pid);
+                document.getElementById(`mana-drop-${pid}`).classList.remove('show');
                 return;
             }
 
