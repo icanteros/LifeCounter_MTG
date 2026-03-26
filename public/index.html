@@ -913,9 +913,9 @@
                 <div class="mini-counter">
                     <span class="mini-label">⚔ Cmdr</span>
                     <div class="mini-controls">
-                        <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
-                        <span class="mini-val" id="cmdr-${player.id}">${player.commander}</span>
-                        <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                        <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                        <span class="mini-val" id="tax-${player.id}">${player.commanderTax || 0}</span>
+                        <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
                     </div>
                 </div>
             </div>
