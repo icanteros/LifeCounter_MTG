@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MTG Life Counter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8c96d;
+            --gold-dark: #8a6a1f;
+            --bg-deep: #0a0a0f;
+            --bg-panel: #10101a;
+            --bg-card: #14141f;
+            --text-primary: #f0e8d5;
+            --text-muted: #7a6e5e;
+
+            /* Mana colors per player */
+            --p1-accent: #3a7bd5; --p1-glow: #1a4a9a;
+            --p2-accent: #c0392b; --p2-glow: #7a1a10;
+            --p3-accent: #27ae60; --p3-glow: #145a32;
+            --p4-accent: #8e44ad; --p4-glow: #4a1a6a;
+
+            /* Mana themes */
+            --w-mana: #f0f2c0; --w-glow: rgba(240, 242, 192, 0.4);
+            --u-mana: #3a7bd5; --u-glow: rgba(58, 123, 213, 0.4);
+            --b-mana: #222222; --b-glow: rgba(255, 255, 255, 0.15);
+            --r-mana: #c0392b; --r-glow: rgba(192, 57, 43, 0.4);
+            --g-mana: #27ae60; --g-glow: rgba(39, 174, 96, 0.4);
+            --c-mana: #777777; --c-glow: rgba(119, 119, 119, 0.4);
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-deep);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* ── LAYOUT ────────────────────────────────────── */
+        #app {
+            display: flex;
+            flex-direction: column;
+            width: 100dvw;
+            height: 100dvh;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            flex: 1;
+            gap: 3px;
+            padding: 3px;
+            background: var(--bg-deep);
+        }
+
+        /* ── PLAYER CARD ───────────────────────────────── */
+        .player {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 14px 10px 10px;
+            transition: background 0.3s;
+        }
+
+        .player::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.07;
+            pointer-events: none;
+            background-image:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.03) 10px,
+                    rgba(255, 255, 255, 0.03) 20px);
+        }
+
+        /* Accent border top */
+        .player::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .player[data-player="1"]::after {
+            background: linear-gradient(90deg, transparent, var(--p1-accent), transparent);
+        }
+
+        .player[data-player="2"]::after {
+            background: linear-gradient(90deg, transparent, var(--p2-accent), transparent);
+        }
+
+        .player[data-player="3"]::after {
+            background: linear-gradient(90deg, transparent, var(--p3-accent), transparent);
+        }
+
+        .player[data-player="4"]::after {
+            background: linear-gradient(90deg, transparent, var(--p4-accent), transparent);
+        }
+
+        /* Subtle inner glow when at low HP */
+        .player.danger {
+            background: #1a0808;
+        }
+
+        .player.danger .life-display {
+            color: #ff6b6b !important;
+            text-shadow: 0 0 30px #ff4444;
+        }
+
+        .player[data-player="1"] {
+            --accent: var(--p1-accent);
+            --glow: var(--p1-glow);
+        }
+
+        .player[data-player="2"] {
+            --accent: var(--p2-accent);
+            --glow: var(--p2-glow);
+        }
+
+        .player[data-player="3"] {
+            --accent: var(--p3-accent);
+            --glow: var(--p3-glow);
+        }
+
+        .player[data-player="4"] {
+            --accent: var(--p4-accent);
+            --glow: var(--p4-glow);
+        }
+
+        /* ── NAME EDITOR ──────────────────────────────── */
+        .player-name-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .player-name {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.7rem, 2.5vw, 1rem);
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 90%;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .player-name:focus {
+            border-bottom-color: var(--accent);
+        }
+
+        /* ── LIFE DISPLAY ─────────────────────────────── */
+        .life-display {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 900;
+            line-height: 1;
+            color: var(--text-primary);
+            text-shadow: 0 0 40px var(--glow);
+            transition: transform 0.1s, color 0.4s, text-shadow 0.4s;
+            user-select: none;
+            position: relative;
+        }
+
+        .life-display.bump {
+            transform: scale(1.12);
+        }
+
+        /* Delta indicator */
+        .delta {
+            position: absolute;
+            top: -0.6em;
+            right: -0.4em;
+            font-size: 0.28em;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(0);
+            transition: opacity 0.6s, transform 0.6s;
+            pointer-events: none;
+        }
+
+        .delta.show {
+            opacity: 1;
+            transform: translateY(-1.2em);
+        }
+
+        .delta.positive {
+            color: #4dff91;
+        }
+
+        .delta.negative {
+            color: #ff5c5c;
+        }
+
+        /* ── BUTTON ROWS ──────────────────────────────── */
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        button {
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            transform: scale(0.93);
+        }
+
+        /* Large +/- */
+        .btn-main {
+            width: clamp(44px, 12vw, 72px);
+            height: clamp(44px, 10vw, 64px);
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-main:hover {
+            background: var(--glow);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--glow);
+        }
+
+        /* Small +5/-5 */
+        .btn-fast {
+            padding: 5px 10px;
+            font-size: clamp(0.65rem, 2.2vw, 0.85rem);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+        }
+
+        .btn-fast:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ── POISON / COMMANDER DAMAGE ─────────────────── */
+        .counters-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mini-counter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .mini-label {
+            font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .mini-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mini-val {
+            font-size: clamp(0.75rem, 2.5vw, 1rem);
+            font-weight: 700;
+            min-width: 22px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .btn-mini {
+            width: clamp(20px, 5vw, 28px);
+            height: clamp(20px, 5vw, 28px);
+            font-size: clamp(0.75rem, 2vw, 1rem);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-mini:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .mini-label-input {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid transparent;
+            text-align: center;
+            width: 80%;
+            outline: none;
+            transition: border-color 0.2s, color 0.2s;
+            cursor: text;
+        }
+
+        .mini-label-input:focus {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ── MANA POOL ──────────────────────────────── */
+        .mana-pool { margin: 8px 0; display: flex; justify-content: center; position: relative; }
+        .mana-selector-btn {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px; padding: 6px 16px; color: var(--text-primary);
+            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+            user-select: none;
+        }
+        .mana-selector-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
+        
+        .mana-dropdown {
+            display: none; position: absolute; inset: 0; background: #0a0a0f;
+            z-index: 100; padding: 15px; flex-direction: column; gap: 8px;
+            border-radius: 12px; backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; border: 1px solid var(--gold);
+        }
+        .mana-dropdown.show { display: flex; }
+        .mana-drop-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
+        .mana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        .mana-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 8px; width: 100%; }
+        .mana-symbol-wrap { display: flex; align-items: center; gap: 8px; }
+        .btn-mana {
+            width: 24px; height: 24px; border-radius: 50%; border: none;
+            font-weight: 900; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+            color: #000;
+        }
+        .btn-mana.w { background: var(--w-mana); }
+        .btn-mana.u { background: var(--u-mana); color: #fff; }
+        .btn-mana.b { background: var(--b-mana); color: #fff; }
+        .btn-mana.r { background: var(--r-mana); color: #fff; }
+        .btn-mana.g { background: var(--g-mana); color: #fff; }
+        .btn-mana.c { background: var(--c-mana); color: #fff; }
+        .mana-val { font-size: 0.9rem; font-weight: 700; color: var(--gold); min-width: 15px; text-align: center; }
+        .mana-ctrls { display: flex; gap: 4px; }
+        .mana-close { color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+
+        /* poison turns green when >= 10 */
+        .poison-critical .mini-val {
+            color: #4dff91;
+            text-shadow: 0 0 8px #00cc55;
+        }
+
+        /* ── COMMANDER ADVANCED ───────────────────────── */
+        .cmdr-adv-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cmdr-adv-btn:hover { color: var(--gold); border-color: var(--gold-dark); }
+
+        .cmdr-details {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(10,10,15,0.95);
+            z-index: 10;
+            padding: 15px;
+            flex-direction: column;
+            gap: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .cmdr-details.show { display: flex; }
+
+        .cmdr-det-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .cmdr-det-title { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold); }
+        .cmdr-close { font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+
+        .cmdr-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .cmdr-dmg-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 5px 8px; border-radius: 6px; }
+        .cmdr-dmg-label { font-size: 0.65rem; color: var(--text-muted); }
+
+        .tax-row { display: flex; align-items: center; justify-content: space-between; background: rgba(201, 168, 76, 0.05); padding: 8px; border-radius: 6px; border: 1px solid rgba(201, 168, 76, 0.1); }
+        .tax-label { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+
+        /* ── LOG PANEL ────────────────────────────────── */
+        #log-overlay {
+            position: fixed; top: 0; right: 0; bottom: 0; width: 300px;
+            background: #0c0c14; border-left: 1px solid rgba(201,168,76,0.2);
+            z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        #log-overlay.show { transform: translateX(0); }
+        .log-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        #log-list { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.75rem; display: flex; flex-direction: column-reverse; gap: 6px; }
+        .log-entry { padding: 6px 8px; border-radius: 4px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--gold-dark); }
+        .log-time { color: var(--text-muted); font-size: 0.6rem; margin-right: 5px; }
+
+        /* ── THEME BUTTON ─────────────────────────────── */
+        .theme-btn { position: absolute; top: 8px; left: 10px; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; z-index: 5; opacity: 0.4; }
+        .theme-btn:hover { opacity: 1; color: var(--gold); }
+
+        /* ── THEMES ───────────────────────────────────── */
+        .player[data-theme="w"] { --accent: var(--w-mana); --glow: var(--w-glow); }
+        .player[data-theme="u"] { --accent: var(--u-mana); --glow: var(--u-glow); }
+        .player[data-theme="b"] { --accent: var(--b-mana); --glow: var(--b-glow); }
+        .player[data-theme="r"] { --accent: var(--r-mana); --glow: var(--r-glow); }
+        .player[data-theme="g"] { --accent: var(--g-mana); --glow: var(--g-glow); }
+        .player[data-theme="c"] { --accent: var(--c-mana); --glow: var(--c-glow); }
+
+        /* ── DEATH OVERLAY (DARK SOULS STYLE) ─────────── */
+        .death-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+        }
+
+        .death-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .death-text {
+            color: #ff0000;
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 1);
+            transform: scale(0.8);
+            transition: transform 3s ease-out;
+            text-align: center;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .death-overlay.show .death-text {
+            transform: scale(1.1);
+            animation: deathShake 0.5s ease-in-out;
+        }
+
+        @keyframes deathShake {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.05) rotate(1deg); }
+            75% { transform: scale(1.05) rotate(-1deg); }
+        }
+
+        .revive-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+        }
+
+        .revive-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            border-color: var(--gold);
+        }
+
+        /* ── BOTTOM BAR ─────────────────────────────────── */
+        #bottom-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 16px;
+            background: #0c0c14;
+            border-top: 1px solid rgba(201, 168, 76, 0.15);
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        #title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.65rem, 2.5vw, 0.9rem);
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px var(--gold-dark);
+            white-space: nowrap;
+        }
+
+        #reset-btn {
+            padding: 8px 18px;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #1a0d00, #2c1800);
+            color: var(--gold);
+            border: 1px solid var(--gold-dark);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+
+        #reset-btn:hover {
+            background: linear-gradient(135deg, #2c1800, #4a2c00);
+            box-shadow: 0 0 20px rgba(201, 168, 76, 0.45);
+        }
+
+        #reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ── RESET CONFIRMATION OVERLAY ─────────────────── */
+        #confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        #confirm-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #confirm-box {
+            background: #16162a;
+            border: 1px solid var(--gold-dark);
+            border-radius: 16px;
+            padding: 30px 36px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(201, 168, 76, 0.25);
+            max-width: 320px;
+            width: 90%;
+        }
+
+        #confirm-box h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        #confirm-box p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 22px;
+        }
+
+        .confirm-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        #confirm-yes {
+            padding: 10px 24px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            background: linear-gradient(135deg, #4a0000, #800000);
+            color: #ffaaaa;
+            border: 1px solid #800000;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        #confirm-yes:hover {
+            background: linear-gradient(135deg, #700000, #aa0000);
+        }
+
+        #confirm-no {
+            padding: 10px 24px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        #confirm-no:hover {
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ── MOBILE: rotate cards on portrait ──────────── */
+        /* Players 3 & 4 (bottom row) are rotated 180° on landscape screens
+       so opponents can read across the table */
+        @media (orientation: landscape) and (min-width: 600px) {
+
+            .player[data-player="3"],
+            .player[data-player="4"] {
+                transform: rotate(180deg);
+            }
+        }
+
+        /* Tighten spacing on very small screens */
+        @media (max-width: 400px) {
+            .player {
+                gap: 6px;
+                padding: 8px 6px 6px;
+            }
+
+            #bottom-bar {
+                padding: 4px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div id="grid">
+            <!-- Players generated by JS -->
+        </div>
+        <div id="bottom-bar">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+                <span id="title">⚔ MTG Life Counter</span>
+                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+            </div>
+            <button id="toggle-log" style="background:transparent; color:var(--gold); border:1px solid var(--gold-dark); padding:4px 10px; font-size:0.7rem; border-radius:5px;">📜 LOG</button>
+            <button id="reset-btn">↺ Reiniciar</button>
+        </div>
+    </div>
+
+    <!-- Log Overlay -->
+    <div id="log-overlay">
+        <div class="log-header">
+            <span style="font-family:'Cinzel'; color:var(--gold);">Historial</span>
+            <span id="close-log" style="cursor:pointer; font-size:1.2rem;">&times;</span>
+        </div>
+        <div id="log-list"></div>
+    </div>
+
+    <!-- Reset confirmation -->
+    <div id="confirm-overlay">
+        <div id="confirm-box">
+            <h2>¿Reiniciar partida?</h2>
+            <p>Se restablecerán las vidas y contadores de todos los jugadores a 40.</p>
+            <div class="confirm-btns">
+                <button id="confirm-yes">Sí, reiniciar</button>
+                <button id="confirm-no">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STARTING_LIFE = 40;
+        const PLAYERS = [
+            { id: 1, name: 'Jugador 1' },
+            { id: 2, name: 'Jugador 2' },
+            { id: 3, name: 'Jugador 3' },
+            { id: 4, name: 'Jugador 4' },
+        ];
+
+        // State initialization with localStorage
+        const STORAGE_KEY = 'mtg_life_counter_state';
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            const defaults = PLAYERS.map(p => ({
+                id: p.id,
+                name: p.name,
+                life: STARTING_LIFE,
+                poison: 0,
+                commander: 0,
+                commanderTax: 0,
+                commanderDamage: { 1:0, 2:0, 3:0, 4:0 },
+                mana: { w:0, u:0, b:0, r:0, g:0, c:0 },
+                poisonLabel: '☠ Veneno',
+                theme: 'default'
+            }));
+
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Merge parsed with defaults to ensure all fields exist
+                    return parsed.map((p, i) => ({
+                        ...defaults[i],
+                        ...p,
+                        // Deep merge for nested objects if they exist
+                        commanderDamage: { ...defaults[i].commanderDamage, ...(p.commanderDamage || {}) },
+                        mana: { ...defaults[i].mana, ...(p.mana || {}) }
+                    }));
+                } catch (e) {
+                    console.error("Error loading state", e);
+                }
+            }
+            return defaults;
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        let state = loadState();
+        let logData = JSON.parse(localStorage.getItem('mtg_log') || '[]');
+
+        function addToLog(msg) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            logData.push({ time, msg });
+            if (logData.length > 50) logData.shift();
+            localStorage.setItem('mtg_log', JSON.stringify(logData));
+            renderLog();
+        }
+
+        function renderLog() {
+            const list = document.getElementById('log-list');
+            list.innerHTML = logData.map(e => `
+                <div class="log-entry">
+                    <span class="log-time">${e.time}</span> ${e.msg}
+                </div>
+            `).join('');
+        }
+
+        // Build UI
+        const grid = document.getElementById('grid');
+
+        function createPlayerCard(player) {
+            const el = document.createElement('div');
+            el.className = 'player';
+            el.dataset.player = player.id;
+            el.dataset.theme = player.theme || '';
+            el.id = `player-${player.id}`;
+
+            // Commander damage matrix
+            const enemies = state.filter(p => p.id !== player.id);
+            const cmdrDmgHtml = enemies.map(e => `
+                <div class="cmdr-dmg-item">
+                    <span class="cmdr-dmg-label" id="cmdr-lbl-${player.id}-${e.id}">VS ${e.name}</span>
+                    <div class="mini-controls">
+                        <button class="btn-mini" data-pid="${player.id}" data-type="cmdrDmg" data-target="${e.id}" data-delta="-1">−</button>
+                        <span class="mini-val" id="cmdr-dmg-${player.id}-${e.id}">${player.commanderDamage[e.id] || 0}</span>
+                        <button class="btn-mini" data-pid="${player.id}" data-type="cmdrDmg" data-target="${e.id}" data-delta="+1">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            el.innerHTML = `
+      <div class="theme-btn" data-pid="${player.id}">🎨</div>
+      <div class="player-name-wrap">
+        <input class="player-name" type="text" value="${player.name}"
+               placeholder="Jugador ${player.id}"
+               maxlength="20" aria-label="Nombre del jugador ${player.id}" />
+      </div>
+
+      <div class="life-display" id="life-${player.id}">
+        ${player.life}
+        <span class="delta" id="delta-${player.id}"></span>
+      </div>
+
+      <div class="mana-pool">
+        <button class="mana-selector-btn" data-pid="${player.id}">💎 MANA</button>
+      </div>
+
+      <div class="mana-dropdown" id="mana-drop-${player.id}">
+        <div class="mana-drop-header">
+          <span class="cmdr-det-title">Reserva de Maná</span>
+          <span class="mana-close" data-pid="${player.id}">&times;</span>
+        </div>
+        <div class="mana-grid">
+          ${['w','u','b','r','g','c'].map(c => `
+            <div class="mana-item">
+              <div class="mana-symbol-wrap">
+                <div class="btn-mana ${c}">${c.toUpperCase()}</div>
+                <span class="mana-val" id="mana-${player.id}-${c}">${player.mana[c]}</span>
+              </div>
+              <div class="mana-ctrls">
+                <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1">−</button>
+                <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1">+</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-fast" data-pid="${player.id}" data-delta="-5">−5</button>
+        <button class="btn-main" data-pid="${player.id}" data-delta="-1">−</button>
+        <button class="btn-main" data-pid="${player.id}" data-delta="+1">+</button>
+        <button class="btn-fast" data-pid="${player.id}" data-delta="+5">+5</button>
+      </div>
+
+      <div class="counters-row">
+        <!-- Contador de veneno oculto internamente -->
+        <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
+          <input class="mini-label-input" value="${player.poisonLabel || '☠ Veneno'}" 
+                 data-pid="${player.id}" data-type="poisonLabel" maxlength="15" />
+          <div class="mini-controls">
+            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1">−</button>
+            <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
+            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1">+</button>
+          </div>
+        </div>
+
+        <div class="mini-counter" id="tax-wrap-${player.id}">
+          <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
+          <div class="mini-controls">
+            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1">−</button>
+            <span class="mini-val" id="tax-${player.id}">${player.commanderTax}</span>
+            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1">+</button>
+          </div>
+        </div>
+
+        <div class="mini-counter">
+          <button class="cmdr-adv-btn" data-pid="${player.id}">⚔ Comandante</button>
+        </div>
+      </div>
+
+      <!-- Advanced Commander UI -->
+      <div class="cmdr-details" id="cmdr-det-${player.id}">
+        <div class="cmdr-det-header">
+            <span class="cmdr-det-title">Stats de Comandante</span>
+            <span class="cmdr-close">&times;</span>
+        </div>
+
+        <div class="cmdr-det-title" style="font-size:0.6rem; margin-top:5px;">Daño Recibido De</div>
+        <div class="cmdr-matrix">
+            ${cmdrDmgHtml}
+        </div>
+      </div>
+
+      <div class="death-overlay" id="death-${player.id}">
+        <div class="death-text">HAS MUERTO</div>
+        <button class="revive-btn" data-pid="${player.id}">Reiniciar Jugador</button>
+      </div>
+    `;
+
+            return el;
+        }
+
+        state.forEach(p => {
+            grid.appendChild(createPlayerCard(p));
+        });
+
+        // ── Render ───────────────────────────────────────────
+        function render(id, delta, logMsg) {
+            const s = state.find(p => p.id === id);
+            const lifeEl = document.getElementById(`life-${id}`);
+            const deltaEl = document.getElementById(`delta-${id}`);
+            const poisonEl = document.getElementById(`poison-${id}`);
+            const poisonWrap = document.getElementById(`poison-wrap-${id}`);
+            const card = document.getElementById(`player-${id}`);
+            const taxEl = document.getElementById(`tax-${id}`);
+
+            // New fields
+            card.dataset.theme = s.theme || '';
+
+            // Update Mana values
+            ['w','u','b','r','g','c'].forEach(color => {
+                const mEl = document.getElementById(`mana-${id}-${color}`);
+                if (mEl) mEl.textContent = s.mana[color];
+            });
+
+            // Update Commander Damage matrix
+            const matrix = document.querySelector(`#cmdr-det-${id} .mana-grid`); // Reusing mana-grid class for layout
+            const matrixContainer = document.querySelector(`#cmdr-det-${id} .cmdr-matrix`);
+            if (matrixContainer) {
+                matrixContainer.innerHTML = state.filter(other => other.id !== id).map(other => `
+                    <div class="cmdr-dmg-item">
+                        <span class="cmdr-dmg-label">VS ${other.name}</span>
+                        <div class="mini-controls">
+                            <button class="btn-mini" data-pid="${id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="-1">−</button>
+                            <span class="mini-val">${s.commanderDamage[other.id] || 0}</span>
+                            <button class="btn-mini" data-pid="${id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="+1">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Life number
+            if (lifeEl) lifeEl.childNodes[0].textContent = s.life;
+
+            // Danger mode
+            card.classList.toggle('danger', s.life <= 5);
+
+            // Delta badge
+            if (delta !== undefined && deltaEl) {
+                deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
+                deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
+                clearTimeout(deltaEl._timeout);
+                deltaEl._timeout = setTimeout(() => {
+                    deltaEl.classList.remove('show');
+                }, 1200);
+            }
+
+            // Bump animation
+            if (lifeEl) {
+                lifeEl.classList.remove('bump');
+                void lifeEl.offsetWidth; // reflow
+                lifeEl.classList.add('bump');
+                clearTimeout(lifeEl._bumpTimeout);
+                lifeEl._bumpTimeout = setTimeout(() => lifeEl.classList.remove('bump'), 120);
+            }
+
+            // Mini counters
+            if (poisonEl) poisonEl.textContent = s.poison;
+            if (poisonWrap) poisonWrap.classList.toggle('poison-critical', s.poison >= 10);
+            if (taxEl) taxEl.textContent = s.commanderTax || 0;
+
+            // Death detection
+            const hasLostByLife = s.life <= 0;
+            const hasLostByCmdr = Object.values(s.commanderDamage).some(v => v >= 21);
+            const isDead = hasLostByLife || hasLostByCmdr;
+            const deathOverlay = document.getElementById(`death-${id}`);
+            if (deathOverlay) {
+                const alreadyDead = deathOverlay.classList.contains('show');
+                if (isDead && !alreadyDead) {
+                    const reason = hasLostByLife ? 'Vida 0' : 'Daño Cmdr 21+';
+                    addToLog(`💀 ${s.name} HA MUERTO (${reason})`);
+                }
+                deathOverlay.classList.toggle('show', isDead);
+            }
+
+
+            // Update opponent labels (Name Sync) and damage values
+            state.forEach(other => {
+                if (other.id === id) return;
+                const lbl = document.getElementById(`cmdr-lbl-${id}-${other.id}`);
+                if (lbl) lbl.textContent = `VS ${other.name}`;
+                
+                const dmgEl = document.getElementById(`cmdr-dmg-${id}-${other.id}`);
+                if (dmgEl) dmgEl.textContent = s.commanderDamage[other.id] || 0;
+            });
+
+            if (logMsg) addToLog(logMsg);
+        }
+
+        function renderAll() {
+            state.forEach(s => render(s.id));
+            renderLog();
+        }
+
+        // ── Events: life buttons ─────────────────────────────
+        grid.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-delta]');
+            if (!btn) return;
+
+            const pid = parseInt(btn.dataset.pid);
+            const type = btn.dataset.type; // undefined | poison | tax | mana | cmdrDmg
+            const delta = parseInt(btn.dataset.delta);
+            const s = state.find(p => p.id === pid);
+            let logMsg = '';
+
+            if (!type) {
+                // Main life buttons
+                s.life = Math.max(-999, s.life + delta);
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Vida`;
+                render(pid, delta, logMsg);
+            } else if (type === 'mana') {
+                const color = btn.dataset.color;
+                s.mana[color] = Math.max(0, s.mana[color] + delta);
+                // No log for every single mana click to avoid spam? 
+                // Or maybe just small log? Let's skip mana log for now unless requested.
+                render(pid);
+            } else if (type === 'cmdrDmg') {
+                const target = btn.dataset.target;
+                const other = state.find(p => p.id == target);
+                s.commanderDamage[target] = Math.max(0, s.commanderDamage[target] + delta);
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Daño Cmdr de ${other ? other.name : 'P'+target}`;
+                render(pid, 0, logMsg);
+            } else if (type === 'tax') {
+                s.commanderTax = Math.max(0, s.commanderTax + delta);
+                logMsg = `${s.name}: Muertes Cmdr ${delta > 0 ? '+1' : '-1'}`;
+                render(pid, 0, logMsg);
+            } else {
+                // Poison
+                s[type] = Math.max(0, s[type] + delta);
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} ${s.poisonLabel}`;
+                render(pid, 0, logMsg);
+            }
+            saveState();
+        });
+
+        // ── Events: UI Interactions (Log, Themes, Cmdr Adv) ────
+        document.getElementById('toggle-log').addEventListener('click', () => {
+            document.getElementById('log-overlay').classList.add('show');
+        });
+        document.getElementById('close-log').addEventListener('click', () => {
+            document.getElementById('log-overlay').classList.remove('show');
+        });
+
+        grid.addEventListener('click', e => {
+            // Mana selector toggle
+            if (e.target.classList.contains('mana-selector-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                const dropdown = document.getElementById(`mana-drop-${pid}`);
+                document.querySelectorAll('.mana-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                dropdown.classList.add('show');
+                return;
+            }
+            if (e.target.classList.contains('mana-close')) {
+                const pid = parseInt(e.target.dataset.pid);
+                document.getElementById(`mana-drop-${pid}`).classList.remove('show');
+                return;
+            }
+
+            // Theme picker
+            if (e.target.classList.contains('theme-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                const s = state.find(p => p.id === pid);
+                const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
+                const idx = themes.indexOf(s.theme || 'default');
+                s.theme = themes[(idx + 1) % themes.length];
+                render(pid);
+                saveState();
+                return;
+            }
+
+            // Commander advanced UI toggle
+            if (e.target.classList.contains('cmdr-adv-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                document.getElementById(`cmdr-det-${pid}`).classList.add('show');
+                return;
+            }
+            if (e.target.classList.contains('cmdr-close')) {
+                e.target.closest('.cmdr-details').classList.remove('show');
+                return;
+            }
+        });
+
+        // ── Events: inputs (names and labels) ────────────────
+        grid.addEventListener('input', e => {
+            const card = e.target.closest('.player');
+            if (!card) return;
+            const pid = parseInt(card.dataset.player);
+            const pState = state.find(p => p.id === pid);
+
+            if (e.target.classList.contains('player-name')) {
+                pState.name = e.target.value;
+                // Al cambiar el nombre, actualizamos los labels en todos los jugadores
+                renderAll(); 
+            } else if (e.target.classList.contains('mini-label-input')) {
+                pState.poisonLabel = e.target.value;
+            }
+            saveState();
+        });
+
+        // Close dropdowns clicking outside
+        window.addEventListener('click', e => {
+            if (!e.target.closest('.mana-pool')) {
+                document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
+            }
+            
+            // Revive / Reset individual player
+            if (e.target.classList.contains('revive-btn')) {
+                const pid = parseInt(e.target.dataset.pid);
+                const s = state.find(p => p.id === pid);
+                s.life = STARTING_LIFE;
+                s.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
+                // Also reset poison if needed (though hidden)
+                s.poison = 0;
+                render(pid);
+                saveState();
+            }
+        });
+
+        // Right click mana to subtract
+        grid.addEventListener('contextmenu', e => {
+            const btn = e.target.closest('.btn-mana');
+            if (btn) {
+                e.preventDefault();
+                const pid = parseInt(btn.dataset.pid);
+                const color = btn.dataset.color;
+                const s = state.find(p => p.id === pid);
+                s.mana[color] = Math.max(0, s.mana[color] - 1);
+                render(pid);
+                saveState();
+            }
+        });
+
+        // Prevent keyboard from pushing layout on mobile
+        grid.addEventListener('focusin', e => {
+            if (e.target.classList.contains('player-name')) {
+                e.target.select();
+            }
+        });
+
+        // ── Reset ────────────────────────────────────────────
+        const overlay = document.getElementById('confirm-overlay');
+        const confirmYes = document.getElementById('confirm-yes');
+        const confirmNo = document.getElementById('confirm-no');
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            overlay.classList.add('show');
+        });
+
+        confirmNo.addEventListener('click', () => {
+            overlay.classList.remove('show');
+        });
+
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) overlay.classList.remove('show');
+        });
+
+        confirmYes.addEventListener('click', () => {
+            state.forEach((s, i) => {
+                s.life = STARTING_LIFE;
+                s.poison = 0;
+                s.commander = 0;
+                s.commanderTax = 0;
+                s.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
+                s.mana = { w:0, u:0, b:0, r:0, g:0, c:0 };
+                s.poisonLabel = '☠ Veneno';
+                s.theme = 'default';
+
+                // Reset UI inputs
+                const card = document.getElementById(`player-${s.id}`);
+                card.querySelector('.player-name').value = PLAYERS[i].name;
+                card.querySelector('.mini-label-input').value = '☠ Veneno';
+                s.name = PLAYERS[i].name;
+            });
+            logData = [];
+            localStorage.setItem('mtg_log', '[]');
+            saveState();
+            renderAll();
+            overlay.classList.remove('show');
+        });
+
+        // ── Init ─────────────────────────────────────────────
+        renderAll();
+
+        // Disable scroll/zoom on touch while using buttons
+        document.addEventListener('touchmove', e => {
+            if (e.target.closest('#grid')) e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+
+</html>

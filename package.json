@@ -1,0 +1,22 @@
+{
+  "name": "mtg-life-counter-multiplayer",
+  "version": "2.0.0",
+  "engines": {
+    "node": "18.20.8"
+  },
+  "description": "MTG Life Counter — Multiplayer en tiempo real",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "postinstall": "echo 'Skipping heavy playwright installation in prod'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

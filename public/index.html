@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MTG Life Counter — Multijugador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8c96d;
+            --gold-dark: #8a6a1f;
+            --bg-deep: #0a0a0f;
+            --bg-panel: #10101a;
+            --bg-card: #14141f;
+            --text-primary: #f0e8d5;
+            --text-muted: #7a6e5e;
+
+            /* Mana themes */
+            --w-mana: #f0f2c0; --w-glow: rgba(240, 242, 192, 0.4);
+            --u-mana: #3a7bd5; --u-glow: rgba(58, 123, 213, 0.4);
+            --b-mana: #222222; --b-glow: rgba(255, 255, 255, 0.15);
+            --r-mana: #c0392b; --r-glow: rgba(192, 57, 43, 0.4);
+            --g-mana: #27ae60; --g-glow: rgba(39, 174, 96, 0.4);
+            --c-mana: #777777; --c-glow: rgba(119, 119, 119, 0.4);
+
+            --p1-accent: #3a7bd5; --p1-glow: #1a4a9a;
+            --p2-accent: #c0392b; --p2-glow: #7a1a10;
+            --p3-accent: #27ae60; --p3-glow: #145a32;
+            --p4-accent: #8e44ad; --p4-glow: #4a1a6a;
+        }
+
+        html, body {
+            width: 100%; height: 100%;
+            background: var(--bg-deep);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* ── SCREENS ──────────────────────────────────────── */
+        .screen { display: none; width: 100dvw; height: 100dvh; }
+        .screen.active { display: flex; }
+
+        /* ── LOBBY SCREEN ─────────────────────────────────── */
+        #lobby-screen {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(58,123,213,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(142,68,173,0.08) 0%, transparent 60%),
+                var(--bg-deep);
+        }
+
+        .lobby-logo {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.4rem, 5vw, 2.4rem);
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(201,168,76,0.4), 0 0 60px rgba(201,168,76,0.15);
+            text-align: center;
+        }
+
+        .lobby-logo span {
+            display: block;
+            font-size: 0.4em;
+            letter-spacing: 0.4em;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .lobby-card {
+            background: #12121e;
+            border: 1px solid rgba(201,168,76,0.2);
+            border-radius: 20px;
+            padding: 36px 40px;
+            width: min(420px, 92vw);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            box-shadow: 0 0 60px rgba(0,0,0,0.6);
+        }
+
+        .lobby-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lobby-section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .slot-btn {
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .slot-btn .slot-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--accent, #444);
+            box-shadow: 0 0 8px var(--accent, #444);
+        }
+
+        .slot-btn[data-slot="1"] { --accent: var(--p1-accent); }
+        .slot-btn[data-slot="2"] { --accent: var(--p2-accent); }
+        .slot-btn[data-slot="3"] { --accent: var(--p3-accent); }
+        .slot-btn[data-slot="4"] { --accent: var(--p4-accent); }
+
+        .slot-btn:not(.taken):hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.07);
+        }
+
+        .slot-btn.selected {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 30%, transparent);
+        }
+
+        .slot-btn.taken {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .lobby-divider {
+            border: none;
+            border-top: 1px solid rgba(201,168,76,0.1);
+        }
+
+        .lobby-input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.2em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+
+        .lobby-input:focus { border-color: var(--gold); }
+        .lobby-input::placeholder { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 0.15em; }
+
+        .lobby-btn {
+            width: 100%;
+            padding: 14px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lobby-btn-primary {
+            background: linear-gradient(135deg, #1a0d00, #2c1800);
+            color: var(--gold);
+            border: 1px solid var(--gold-dark);
+            box-shadow: 0 0 16px rgba(201,168,76,0.15);
+        }
+
+        .lobby-btn-primary:hover {
+            background: linear-gradient(135deg, #2c1800, #4a2c00);
+            box-shadow: 0 0 28px rgba(201,168,76,0.35);
+        }
+
+        .lobby-btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .lobby-btn-secondary:hover {
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        .lobby-error {
+            color: #ff6b6b;
+            font-size: 0.82rem;
+            text-align: center;
+            min-height: 1.2em;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── ROOM CODE DISPLAY ────────────────────────────── */
+        .room-code-display {
+            background: rgba(201,168,76,0.07);
+            border: 1px solid rgba(201,168,76,0.25);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .room-code-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .room-code-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 0.35em;
+            text-shadow: 0 0 20px rgba(201,168,76,0.5);
+        }
+
+        /* ── GAME SCREEN ──────────────────────────────────── */
+        #game-screen {
+            flex-direction: column;
+        }
+
+        #app { display: flex; flex-direction: column; width: 100%; height: 100%; }
+
+        #grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            flex: 1;
+            gap: 3px;
+            padding: 3px;
+            background: var(--bg-deep);
+        }
+
+        /* ── PLAYER CARD ──────────────────────────────────── */
+        .player {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 14px 10px 10px;
+            transition: background 0.3s;
+        }
+
+        .player::before {
+            content: '';
+            position: absolute; inset: 0;
+            opacity: 0.07; pointer-events: none;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px);
+        }
+
+        .player::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; border-radius: 12px 12px 0 0;
+        }
+
+        .player[data-player="1"]::after { background: linear-gradient(90deg, transparent, var(--p1-accent), transparent); }
+        .player[data-player="2"]::after { background: linear-gradient(90deg, transparent, var(--p2-accent), transparent); }
+        .player[data-player="3"]::after { background: linear-gradient(90deg, transparent, var(--p3-accent), transparent); }
+        .player[data-player="4"]::after { background: linear-gradient(90deg, transparent, var(--p4-accent), transparent); }
+
+        .player.danger { background: #1a0808; }
+        .player.danger .life-display { color: #ff6b6b !important; text-shadow: 0 0 30px #ff4444; }
+        .player.disconnected { opacity: 0.45; }
+
+        .player[data-player="1"] { --accent: var(--p1-accent); --glow: var(--p1-glow); }
+        .player[data-player="2"] { --accent: var(--p2-accent); --glow: var(--p2-glow); }
+        .player[data-player="3"] { --accent: var(--p3-accent); --glow: var(--p3-glow); }
+        .player[data-player="4"] { --accent: var(--p4-accent); --glow: var(--p4-glow); }
+
+        /* Connected badge */
+        .conn-badge {
+            position: absolute;
+            top: 8px; right: 10px;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #3d3d3d;
+            transition: background 0.4s, box-shadow 0.4s;
+            z-index: 5;
+        }
+        .conn-badge.online {
+            background: #4dff91;
+            box-shadow: 0 0 8px #00cc55;
+        }
+
+        /* THEME BUTTON */
+        .theme-btn { position: absolute; top: 8px; left: 10px; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; z-index: 5; opacity: 0.4; }
+        .theme-btn:hover { opacity: 1; color: var(--gold); }
+
+        /* THEMES */
+        .player[data-theme="w"] { --accent: var(--w-mana); --glow: var(--w-glow); }
+        .player[data-theme="u"] { --accent: var(--u-mana); --glow: var(--u-glow); }
+        .player[data-theme="b"] { --accent: var(--b-mana); --glow: var(--b-glow); }
+        .player[data-theme="r"] { --accent: var(--r-mana); --glow: var(--r-glow); }
+        .player[data-theme="g"] { --accent: var(--g-mana); --glow: var(--g-glow); }
+        .player[data-theme="c"] { --accent: var(--c-mana); --glow: var(--c-glow); }
+
+        .player-name-wrap {
+            display: flex; align-items: center;
+            gap: 6px; width: 100%; justify-content: center;
+        }
+
+        .player-name {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.7rem, 2.5vw, 1rem);
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            background: transparent; border: none; outline: none;
+            width: 90%;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .player-name:focus { border-bottom-color: var(--accent); }
+        .player-name:disabled { cursor: default; }
+
+        .life-display {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 900; line-height: 1;
+            color: var(--text-primary);
+            text-shadow: 0 0 40px var(--glow);
+            transition: transform 0.1s, color 0.4s, text-shadow 0.4s;
+            user-select: none; position: relative;
+        }
+
+        .life-display.bump { transform: scale(1.12); }
+
+        .delta {
+            position: absolute; top: -0.6em; right: -0.4em;
+            font-size: 0.28em; font-family: 'Rajdhani', sans-serif;
+            font-weight: 700; opacity: 0; transform: translateY(0);
+            transition: opacity 0.6s, transform 0.6s; pointer-events: none;
+        }
+        .delta.show { opacity: 1; transform: translateY(-1.2em); }
+        .delta.positive { color: #4dff91; }
+        .delta.negative { color: #ff5c5c; }
+
+        .btn-row {
+            display: flex; gap: 6px; align-items: center;
+            justify-content: center; width: 100%;
+        }
+
+        button {
+            cursor: pointer; font-family: 'Rajdhani', sans-serif;
+            font-weight: 700; border: none; border-radius: 8px;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        button:active { transform: scale(0.93); }
+
+        .btn-main {
+            width: clamp(44px,12vw,72px); height: clamp(44px,10vw,64px);
+            font-size: clamp(1.4rem,4vw,2.2rem);
+            background: rgba(255,255,255,0.06);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-main:hover { background: var(--glow); border-color: var(--accent); box-shadow: 0 0 12px var(--glow); }
+
+        .btn-fast {
+            padding: 5px 10px;
+            font-size: clamp(0.65rem,2.2vw,0.85rem);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+        }
+        .btn-fast:hover { color: var(--accent); border-color: var(--accent); }
+
+        .counters-row {
+            display: flex; gap: 10px;
+            align-items: center; justify-content: center;
+        }
+
+        .mini-counter { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+        .mini-label {
+            font-size: clamp(0.45rem,1.5vw,0.6rem);
+            text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);
+        }
+
+        .mini-controls { display: flex; align-items: center; gap: 4px; }
+
+        .mini-val {
+            font-size: clamp(0.75rem,2.5vw,1rem); font-weight: 700;
+            min-width: 22px; text-align: center; color: var(--text-primary);
+        }
+
+        .btn-mini {
+            width: clamp(20px,5vw,28px); height: clamp(20px,5vw,28px);
+            font-size: clamp(0.75rem,2vw,1rem);
+            background: rgba(255,255,255,0.05); color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-mini:hover { color: var(--accent); border-color: var(--accent); }
+
+        .mini-label-input {
+            font-family: 'Rajdhani', sans-serif; font-size: clamp(0.45rem, 1.5vw, 0.6rem);
+            text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);
+            background: transparent; border: none; border-bottom: 1px solid transparent;
+            text-align: center; width: 80%; outline: none; transition: border-color 0.2s, color 0.2s;
+        }
+        .mini-label-input:focus { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* MANA POOL */
+        .mana-pool { margin: 8px 0; display: flex; justify-content: center; position: relative; }
+        .mana-selector-btn {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px; padding: 6px 16px; color: var(--text-primary);
+            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .mana-selector-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
+        
+        .mana-dropdown {
+            display: none; position: absolute; inset: 0; background: #0a0a0f;
+            z-index: 100; padding: 15px; flex-direction: column; gap: 8px;
+            border-radius: 12px; backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; border: 1px solid var(--gold);
+        }
+        .mana-dropdown.show { display: flex; }
+        .mana-drop-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
+        .mana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        .mana-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 8px; width: 100%; }
+        .mana-symbol-wrap { display: flex; align-items: center; gap: 8px; }
+        .btn-mana {
+            width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer;
+            font-weight: 900; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+            color: #000;
+        }
+        .btn-mana.w { background: var(--w-mana); }
+        .btn-mana.u { background: var(--u-mana); color: #fff; }
+        .btn-mana.b { background: var(--b-mana); color: #fff; }
+        .btn-mana.r { background: var(--r-mana); color: #fff; }
+        .btn-mana.g { background: var(--g-mana); color: #fff; }
+        .btn-mana.c { background: var(--c-mana); color: #fff; }
+        .mana-val { font-size: 0.9rem; font-weight: 700; color: var(--gold); min-width: 15px; text-align: center; }
+        .mana-ctrls { display: flex; gap: 4px; }
+        .mana-close { color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+
+        .poison-critical .mini-val { color: #4dff91; text-shadow: 0 0 8px #00cc55; }
+
+        /* COMMANDER ADVANCED */
+        .cmdr-adv-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); font-size: 0.6rem; padding: 2px 8px; border-radius: 4px;
+            margin-top: 4px; text-transform: uppercase;
+        }
+        .cmdr-details {
+            display: none; position: absolute; inset: 0; background: rgba(10,10,15,0.95);
+            z-index: 10; padding: 15px; flex-direction: column; gap: 12px; border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .cmdr-details.show { display: flex; }
+        .cmdr-det-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .cmdr-det-title { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold); }
+        .cmdr-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .cmdr-dmg-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 5px 8px; border-radius: 6px; }
+        .cmdr-dmg-label { font-size: 0.65rem; color: var(--text-muted); }
+        .tax-row { display: flex; align-items: center; justify-content: space-between; background: rgba(201, 168, 76, 0.05); padding: 8px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.1); }
+        .tax-label { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+
+        /* DEATH OVERLAY */
+        .death-overlay {
+            position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 50; opacity: 0; visibility: hidden; transition: all 0.5s ease;
+            backdrop-filter: blur(4px); border-radius: 20px;
+        }
+        .death-overlay.show { opacity: 1; visibility: visible; }
+        .death-text {
+            color: #ff0000; font-family: 'Cinzel', serif; font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 700; letter-spacing: 0.25em; text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+            text-align: center; line-height: 1;
+        }
+        .revive-btn {
+            margin-top: 20px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4); padding: 5px 15px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* ── BOTTOM BAR ─────────────────────────────────────── */
+        #bottom-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 6px 16px; background: #0c0c14;
+            border-top: 1px solid rgba(201,168,76,0.15);
+            gap: 10px; flex-shrink: 0;
+        }
+
+        #title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.55rem,2vw,0.8rem);
+            color: var(--gold); letter-spacing: 0.15em;
+            text-transform: uppercase; text-shadow: 0 0 12px var(--gold-dark);
+            white-space: nowrap;
+        }
+
+        #room-code-badge {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.6rem,1.8vw,0.8rem);
+            color: var(--text-muted);
+            letter-spacing: 0.18em;
+            cursor: pointer;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        #room-code-badge:hover { color: var(--gold); }
+        #room-code-badge span { color: var(--gold); }
+
+        #reset-btn {
+            padding: 8px 18px;
+            font-size: clamp(0.7rem,2vw,0.85rem);
+            font-family: 'Cinzel', serif; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            background: linear-gradient(135deg, #1a0d00, #2c1800);
+            color: var(--gold); border: 1px solid var(--gold-dark);
+            border-radius: 8px; box-shadow: 0 0 10px rgba(201,168,76,0.2);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+        #reset-btn:hover { background: linear-gradient(135deg, #2c1800, #4a2c00); box-shadow: 0 0 20px rgba(201,168,76,0.45); }
+        #reset-btn:active { transform: scale(0.95); }
+
+        /* ── CONFIRM OVERLAY ─────────────────────────────────── */
+        #confirm-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        #confirm-overlay.show { opacity: 1; pointer-events: all; }
+
+        #confirm-box {
+            background: #16162a; border: 1px solid var(--gold-dark);
+            border-radius: 16px; padding: 30px 36px;
+            text-align: center; box-shadow: 0 0 40px rgba(201,168,76,0.25);
+            max-width: 320px; width: 90%;
+        }
+        #confirm-box h2 { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--gold); margin-bottom: 8px; }
+        #confirm-box p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 22px; }
+
+        .confirm-btns { display: flex; gap: 12px; justify-content: center; }
+
+        #confirm-yes {
+            padding: 10px 24px; font-family: 'Cinzel', serif; font-weight: 700;
+            font-size: 0.85rem; letter-spacing: 0.08em;
+            background: linear-gradient(135deg, #4a0000, #800000);
+            color: #ffaaaa; border: 1px solid #800000; border-radius: 8px;
+        }
+        #confirm-yes:hover { background: linear-gradient(135deg, #700000, #aa0000); }
+
+        #confirm-no {
+            padding: 10px 24px; font-family: 'Cinzel', serif; font-weight: 700;
+            font-size: 0.85rem; letter-spacing: 0.08em;
+            background: rgba(255,255,255,0.05); color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+        }
+        #confirm-no:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.25); }
+
+        /* ── TOAST ───────────────────────────────────────────── */
+        #toast {
+            position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1e1e30; border: 1px solid rgba(201,168,76,0.3);
+            border-radius: 10px; padding: 10px 20px;
+            font-size: 0.82rem; color: var(--gold);
+            letter-spacing: 0.05em; opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none; white-space: nowrap; z-index: 200;
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (orientation: landscape) and (min-width: 600px) {
+            .player[data-player="3"],
+            .player[data-player="4"] { transform: rotate(180deg); }
+        }
+
+        @media (max-width: 400px) {
+            .player { gap: 6px; padding: 8px 6px 6px; }
+            #bottom-bar { padding: 4px 10px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ── LOBBY SCREEN ──────────────────────────────────────────────────── -->
+<div id="lobby-screen" class="screen active">
+    <div class="lobby-logo">
+        ⚔ MTG Life Counter
+        <span>Multijugador en tiempo real</span>
+    </div>
+
+    <div class="lobby-card">
+
+        <!-- CREATE ROOM -->
+        <div id="create-section" class="lobby-section">
+            <div class="lobby-section-title">Nueva sala</div>
+            <button class="lobby-btn lobby-btn-primary" id="create-btn">Crear sala</button>
+        </div>
+
+        <hr class="lobby-divider" />
+
+        <!-- JOIN ROOM -->
+        <div class="lobby-section">
+            <div class="lobby-section-title">Unirse a sala existente</div>
+            <input id="code-input" class="lobby-input" type="text"
+                   maxlength="5" placeholder="Código de sala" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <!-- SLOT PICKER (shown after code entered or room created) -->
+        <div class="lobby-section" id="slot-section" style="display:none;">
+            <div class="lobby-section-title">Elegí tu lugar</div>
+            <div class="slot-grid" id="slot-grid">
+                <button class="slot-btn" data-slot="1"><span class="slot-dot"></span>Jugador 1</button>
+                <button class="slot-btn" data-slot="2"><span class="slot-dot"></span>Jugador 2</button>
+                <button class="slot-btn" data-slot="3"><span class="slot-dot"></span>Jugador 3</button>
+                <button class="slot-btn" data-slot="4"><span class="slot-dot"></span>Jugador 4</button>
+            </div>
+        </div>
+
+        <!-- ROOM CODE DISPLAY (after creation) -->
+        <div id="room-code-section" class="room-code-display" style="display:none;">
+            <span class="room-code-label">Código de sala — compartilo con tus amigos</span>
+            <span class="room-code-value" id="lobby-code-value">—</span>
+        </div>
+
+        <div class="lobby-error" id="lobby-error"></div>
+
+        <button class="lobby-btn lobby-btn-primary" id="join-btn" style="display:none;">
+            Entrar al juego
+        </button>
+
+    </div>
+</div>
+
+<!-- ── GAME SCREEN ───────────────────────────────────────────────────── -->
+<div id="game-screen" class="screen">
+    <div id="app">
+        <div id="grid"><!-- Players generated by JS --></div>
+        <div id="bottom-bar">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+                <span id="title">⚔ MTG Life Counter</span>
+                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+            </div>
+            <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
+            <button id="reset-btn">↺ Reiniciar</button>
+        </div>
+    </div>
+
+    <div id="confirm-overlay">
+        <div id="confirm-box">
+            <h2>¿Reiniciar partida?</h2>
+            <p>Se restablecerán las vidas y contadores de todos los jugadores a 40.</p>
+            <div class="confirm-btns">
+                <button id="confirm-yes">Sí, reiniciar</button>
+                <button id="confirm-no">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Socket.io client (served by the server) -->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    // ─────────────────────────────────────────────
+    // SOCKET
+    // ─────────────────────────────────────────────
+    const socket = io();
+
+    let myRoomCode = null;
+    let mySlot = null;
+    let pendingCode = null;
+    let pendingSlot = null;
+
+    // ─────────────────────────────────────────────
+    // SCREEN HELPERS
+    // ─────────────────────────────────────────────
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function showToast(msg, duration = 2200) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._t);
+        t._t = setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    // ─────────────────────────────────────────────
+    // LOBBY LOGIC
+    // ─────────────────────────────────────────────
+    const createBtn     = document.getElementById('create-btn');
+    const joinBtn       = document.getElementById('join-btn');
+    const codeInput     = document.getElementById('code-input');
+    const slotSection   = document.getElementById('slot-section');
+    const slotGrid      = document.getElementById('slot-grid');
+    const lobbyError    = document.getElementById('lobby-error');
+    const roomCodeSection = document.getElementById('room-code-section');
+    const lobbyCodeValue  = document.getElementById('lobby-code-value');
+
+    let selectedSlot = null;
+    let isCreating = false;
+
+    function setLobbyError(msg) { lobbyError.textContent = msg; }
+    function clearLobbyError()  { lobbyError.textContent = ''; }
+
+    // Show slot picker
+    function showSlotPicker(connectedSlots = []) {
+        slotSection.style.display = '';
+        joinBtn.style.display = '';
+        document.querySelectorAll('.slot-btn').forEach(btn => {
+            const slot = parseInt(btn.dataset.slot);
+            const taken = connectedSlots.includes(slot);
+            btn.classList.toggle('taken', taken);
+            btn.disabled = taken;
+        });
+    }
+
+    createBtn.addEventListener('click', () => {
+        clearLobbyError();
+        isCreating = true;
+        socket.emit('create_room');
+    });
+
+    socket.on('room_created', ({ code }) => {
+        myRoomCode = code;
+        pendingCode = code;
+        lobbyCodeValue.textContent = code;
+        roomCodeSection.style.display = '';
+        showSlotPicker([]);
+        createBtn.style.display = 'none';
+        codeInput.style.display = 'none';
+        document.querySelector('#create-section .lobby-section-title').style.display = 'none';
+    });
+
+    codeInput.addEventListener('input', () => {
+        codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        clearLobbyError();
+        const code = codeInput.value.trim();
+        if (code.length === 5) {
+            pendingCode = code;
+            showSlotPicker([]);
+        } else {
+            slotSection.style.display = 'none';
+            joinBtn.style.display = 'none';
+            selectedSlot = null;
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        }
+    });
+
+    slotGrid.addEventListener('click', e => {
+        const btn = e.target.closest('.slot-btn');
+        if (!btn || btn.disabled) return;
+        selectedSlot = parseInt(btn.dataset.slot);
+        pendingSlot = selectedSlot;
+        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        clearLobbyError();
+    });
+
+    joinBtn.addEventListener('click', () => {
+        if (!pendingCode) { setLobbyError('Ingresá un código de sala.'); return; }
+        if (!pendingSlot) { setLobbyError('Elegí tu lugar de jugador.'); return; }
+        clearLobbyError();
+        socket.emit('join_room', { code: pendingCode, playerSlot: pendingSlot });
+    });
+
+    // ─────────────────────────────────────────────
+    // GAME: JOIN
+    // ─────────────────────────────────────────────
+    socket.on('joined_room', ({ code, players, mySlot: slot }) => {
+        myRoomCode = code;
+        mySlot = slot;
+        document.getElementById('game-code-display').textContent = code;
+        buildGrid(players);
+        showScreen('game-screen');
+    });
+
+    socket.on('error', ({ message }) => {
+        setLobbyError(message);
+    });
+
+    // ─────────────────────────────────────────────
+    // GAME GRID
+    // ─────────────────────────────────────────────
+    const grid = document.getElementById('grid');
+
+    function buildGrid(players) {
+        grid.innerHTML = '';
+        players.forEach(p => grid.appendChild(createPlayerCard(p)));
+    }
+
+    function createPlayerCard(player) {
+        const el = document.createElement('div');
+        el.className = 'player';
+        el.dataset.player = player.id;
+        el.id = `player-${player.id}`;
+        const isMe = (player.id === mySlot);
+
+        el.innerHTML = `
+            <div class="theme-btn" data-pid="${player.id}">🎨</div>
+            <span class="conn-badge ${player.connected ? 'online' : ''}" id="conn-${player.id}"></span>
+            
+            <div class="player-name-wrap">
+                <input type="text" class="player-name" value="${escHtml(player.name)}" 
+                       ${isMe ? '' : 'disabled'} maxlength="16" />
+            </div>
+
+            <div class="life-display" id="life-${player.id}">
+                ${player.life}
+                <div class="delta" id="delta-${player.id}"></div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${isMe ? '' : 'disabled'}>-5</button>
+                <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                <button class="btn-main" data-pid="${player.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                <button class="btn-fast" data-pid="${player.id}" data-delta="+5" ${isMe ? '' : 'disabled'}>+5</button>
+            </div>
+
+            <div class="mana-pool">
+                <button class="mana-selector-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>
+                    💎 MANA
+                </button>
+            </div>
+
+            <div class="mana-dropdown" id="mana-drop-${player.id}">
+                <div class="mana-drop-header">
+                    <span class="cmdr-det-title">Reserva de Maná</span>
+                    <span class="mana-close" data-pid="${player.id}">&times;</span>
+                </div>
+                <div class="mana-grid">
+                    ${['w','u','b','r','g','c'].map(c => `
+                        <div class="mana-item">
+                            <div class="mana-symbol-wrap">
+                                <div class="btn-mana ${c}">${c.toUpperCase()}</div>
+                                <span class="mana-val" id="mana-${player.id}-${c}">${player.mana ? player.mana[c] : 0}</span>
+                            </div>
+                            <div class="mana-ctrls">
+                                <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                                <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="counters-row">
+                    <span class="mini-label">☠ Veneno</span>
+                    <div class="mini-controls">
+                        <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                        <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
+                        <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                    </div>
+                </div>
+                <div class="mini-counter">
+                    <span class="mini-label">⚔ Cmdr</span>
+                    <div class="mini-controls">
+                        <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                        <span class="mini-val" id="cmdr-${player.id}">${player.commander}</span>
+                        <button class="btn-mini" data-pid="${player.id}" data-type="commander" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return el;
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─────────────────────────────────────────────
+    // GAME STATE UPDATE (from server)
+    // ─────────────────────────────────────────────
+    const prevLife = {};
+    const ALL_PLAYERS = [1, 2, 3, 4];
+
+    function updatePlayerUI(p, players) {
+        const lifeEl    = document.getElementById(`life-${p.id}`);
+        const deltaEl   = document.getElementById(`delta-${p.id}`);
+        const poisonEl  = document.getElementById(`poison-${p.id}`);
+        const taxEl     = document.getElementById(`tax-${p.id}`);
+        const poisonWrap= document.getElementById(`poison-wrap-${p.id}`);
+        const card      = document.getElementById(`player-${p.id}`);
+        const connBadge = document.getElementById(`conn-${p.id}`);
+        const nameInput = card ? card.querySelector('.player-name') : null;
+        const poisonLabelInput = document.getElementById(`label-poison-${p.id}`);
+        const deathOverlay = document.getElementById(`death-${p.id}`);
+
+        if (!lifeEl) return;
+
+        // Theme and Connection
+        card.dataset.theme = p.theme || 'default';
+        card.classList.toggle('danger', p.life <= 5);
+        card.classList.toggle('disconnected', !p.connected);
+        if (connBadge) connBadge.classList.toggle('online', p.connected);
+
+        // Life and Delta
+        const oldLife = prevLife[p.id];
+        const delta = (oldLife !== undefined) ? (p.life - oldLife) : undefined;
+        prevLife[p.id] = p.life;
+        lifeEl.childNodes[0].textContent = p.life;
+
+        if (delta !== undefined && delta !== 0) {
+            deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
+            deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
+            clearTimeout(deltaEl._t);
+            deltaEl._t = setTimeout(() => deltaEl.classList.remove('show'), 1200);
+            
+            lifeEl.classList.remove('bump');
+            void lifeEl.offsetWidth;
+            lifeEl.classList.add('bump');
+        }
+
+        // Mana
+        ['w','u','b','r','g','c'].forEach(c => {
+            const mEl = document.getElementById(`mana-${p.id}-${c}`);
+            if (mEl) mEl.textContent = p.mana ? p.mana[c] : 0;
+        });
+
+        // Mini counters
+        if (poisonEl) poisonEl.textContent = p.poison;
+        if (taxEl) taxEl.textContent = p.commanderTax || 0;
+        if (poisonWrap) poisonWrap.classList.toggle('poison-critical', p.poison >= 10);
+
+        // Name and Poison Label
+        if (nameInput && document.activeElement !== nameInput) nameInput.value = p.name;
+        if (poisonLabelInput && document.activeElement !== poisonLabelInput) poisonLabelInput.value = p.poisonLabel || '☠ Veneno';
+
+        // Death logic
+        const hasLostByLife = p.life <= 0;
+        const hasLostByCmdr = Object.values(p.commanderDamage || {}).some(v => v >= 21);
+        if (deathOverlay) deathOverlay.classList.toggle('show', hasLostByLife || hasLostByCmdr);
+
+        // Commander Matrix
+        const matrix = document.getElementById(`cmdr-matrix-${p.id}`);
+        if (matrix) {
+            const isMe = p.id === mySlot;
+            matrix.innerHTML = players.filter(other => other.id !== p.id).map(other => `
+                <div class="cmdr-dmg-item">
+                    <span class="cmdr-dmg-label">VS ${escHtml(other.name)}</span>
+                    <div class="mini-controls">
+                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                        <span class="mini-val">${p.commanderDamage ? (p.commanderDamage[other.id] || 0) : 0}</span>
+                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    socket.on('game_state', ({ players }) => {
+        players.forEach(p => updatePlayerUI(p, players));
+    });
+
+    // ─────────────────────────────────────────────
+    // EVENTS: life buttons
+    // ─────────────────────────────────────────────
+    grid.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn || btn.disabled) return;
+
+        const pid = parseInt(btn.dataset.pid);
+        const type = btn.dataset.type;
+        const delta = parseInt(btn.dataset.delta);
+        const target = btn.dataset.target;
+        const color = btn.dataset.color;
+
+        // Mana dropdown toggle
+        if (btn.classList.contains('mana-selector-btn')) {
+            const drop = document.getElementById(`mana-drop-${pid}`);
+            document.querySelectorAll('.mana-dropdown').forEach(d => { if(d !== drop) d.classList.remove('show'); });
+            drop.classList.add('show');
+            return;
+        }
+        if (btn.classList.contains('mana-close')) {
+            const drop = document.getElementById(`mana-drop-${pid}`);
+            drop.classList.remove('show');
+            return;
+        }
+
+        // Commander detail toggle
+        if (btn.classList.contains('cmdr-adv-btn')) {
+            document.getElementById(`cmdr-det-${pid}`).classList.add('show');
+            return;
+        }
+        if (btn.classList.contains('cmdr-close')) {
+            document.getElementById(`cmdr-det-${pid}`).classList.remove('show');
+            return;
+        }
+
+        // Theme picker
+        if (btn.classList.contains('theme-btn')) {
+            const card = document.getElementById(`player-${pid}`);
+            const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
+            const current = card.dataset.theme || 'default';
+            const next = themes[(themes.indexOf(current) + 1) % themes.length];
+            socket.emit('counter_change', { pid, type: 'theme', label: next });
+            return;
+        }
+
+        // Revive
+        if (btn.classList.contains('revive-btn')) {
+            socket.emit('reset_game'); // O podríamos hacer un reset individual si el server lo soporta
+            return;
+        }
+
+        if (!type && delta) {
+            socket.emit('life_change', { pid, delta });
+        } else if (type) {
+            socket.emit('counter_change', { pid, type, delta, color, target });
+        }
+    });
+
+    // Close mana dropdowns clicking outside
+    window.addEventListener('click', e => {
+        if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) {
+            document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
+        }
+    });
+
+    // Right click mana to subtract
+    grid.addEventListener('contextmenu', e => {
+        const btn = e.target.closest('.btn-mana');
+        if (btn && !btn.disabled) {
+            e.preventDefault();
+            const pid = parseInt(btn.dataset.pid);
+            const color = btn.dataset.color;
+            socket.emit('counter_change', { pid, type: 'mana', color, delta: -1 });
+        }
+    });
+
+    // ─────────────────────────────────────────────
+    // EVENTS: name input
+    // ─────────────────────────────────────────────
+    grid.addEventListener('input', e => {
+        const pid = parseInt(e.target.closest('.player').dataset.player);
+        if (e.target.classList.contains('player-name')) {
+            socket.emit('name_change', { pid, name: e.target.value });
+        } else if (e.target.classList.contains('mini-label-input')) {
+            socket.emit('counter_change', { pid, type: 'poisonLabel', label: e.target.value });
+        }
+    });
+
+    // ─────────────────────────────────────────────
+    // EVENTS: reset
+    // ─────────────────────────────────────────────
+    const overlay    = document.getElementById('confirm-overlay');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo  = document.getElementById('confirm-no');
+
+    document.getElementById('reset-btn').addEventListener('click', () => overlay.classList.add('show'));
+    confirmNo.addEventListener('click', () => overlay.classList.remove('show'));
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
+    confirmYes.addEventListener('click', () => {
+        socket.emit('reset_game');
+        overlay.classList.remove('show');
+    });
+
+    // ─────────────────────────────────────────────
+    // COPY ROOM CODE
+    // ─────────────────────────────────────────────
+    document.getElementById('room-code-badge').addEventListener('click', () => {
+        if (!myRoomCode) return;
+        navigator.clipboard.writeText(myRoomCode).then(() => showToast('✓ Código copiado: ' + myRoomCode));
+    });
+
+    // ─────────────────────────────────────────────
+    // TOUCH: prevent scroll/zoom on grid
+    // ─────────────────────────────────────────────
+    document.addEventListener('touchmove', e => {
+        if (e.target.closest('#grid')) e.preventDefault();
+    }, { passive: false });
+</script>
+
+</body>
+</html>
