@@ -5,6 +5,8 @@ node_modules/
 .env
 .env.local
 .env.*.local
+.env.production
+! .env.example
 
 # Logs de npm
 npm-debug.log*
@@ -32,3 +34,4 @@ test_results.*
 .vercel/
 .netlify/
 .serverpress/
+.railway/

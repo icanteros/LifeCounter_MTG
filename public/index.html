@@ -466,7 +466,7 @@
         
         .mana-dropdown {
             display: none; position: absolute; inset: 0; background: rgba(10,10,15,0.98);
-            z-index: 100; padding: 10px; flex-direction: column; gap: 8px;
+            z-index: 100; padding: 15px; flex-direction: column; gap: 8px;
             border-radius: 12px; backdrop-filter: blur(8px);
             align-items: center; justify-content: center; border: 1px solid var(--gold);
         }
@@ -899,6 +899,7 @@
                         `).join('')}
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="counters-row">
@@ -1072,7 +1073,7 @@
 
     // Close mana dropdowns clicking outside
     window.addEventListener('click', e => {
-        if (!e.target.closest('.mana-pool')) {
+        if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) {
             document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
         }
     });

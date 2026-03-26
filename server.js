@@ -6,7 +6,13 @@ const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    },
+    transports: ['websocket', 'polling']
+});
 
 const PORT = process.env.PORT || 3000;
 const STARTING_LIFE = 40;
@@ -32,8 +38,8 @@ function createRoomState() {
         poison: 0,
         poisonLabel: '☠ Veneno',
         commanderTax: 0,
-        commanderDamage: { 1:0, 2:0, 3:0, 4:0 },
-        mana: { w:0, u:0, b:0, r:0, g:0, c:0 },
+        commanderDamage: { 1: 0, 2: 0, 3: 0, 4: 0 },
+        mana: { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 },
         theme: 'default',
         connected: false,
     }));
@@ -136,7 +142,7 @@ io.on('connection', (socket) => {
         } else if (type === 'theme') {
             p.theme = label; // Usamos label como valor de tema
         }
-        
+
         io.to(socket.data.roomCode).emit('game_state', { players: room.players });
     });
 
@@ -159,8 +165,8 @@ io.on('connection', (socket) => {
             p.poison = 0;
             p.poisonLabel = '☠ Veneno';
             p.commanderTax = 0;
-            p.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
-            p.mana = { w:0, u:0, b:0, r:0, g:0, c:0 };
+            p.commanderDamage = { 1: 0, 2: 0, 3: 0, 4: 0 };
+            p.mana = { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
             p.theme = 'default';
             p.name = `Jugador ${p.id}`;
         });
