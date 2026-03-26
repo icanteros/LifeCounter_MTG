@@ -805,7 +805,7 @@
         const code = codeInput.value.trim();
         if (code.length === 5) {
             pendingCode = code;
-            showSlotPicker([]);
+            socket.emit('check_room', { code });
         } else {
             slotSection.style.display = 'none';
             joinBtn.style.display = 'none';
@@ -842,6 +842,12 @@
         showScreen('game-screen');
     });
 
+    socket.on('room_info', ({ code, taken }) => {
+        if (pendingCode === code) {
+            showSlotPicker(taken);
+        }
+    });
+
     socket.on('error', ({ message }) => {
         setLobbyError(message);
     });
@@ -873,7 +879,7 @@
             </div>
 
             <div class="life-display" id="life-${player.id}">
-                ${player.life}
+                <span class="life-val">${player.life}</span>
                 <div class="delta" id="delta-${player.id}"></div>
             </div>
 
@@ -991,7 +997,8 @@
         const oldLife = prevLife[p.id];
         const delta = (oldLife !== undefined) ? (p.life - oldLife) : undefined;
         prevLife[p.id] = p.life;
-        lifeEl.childNodes[0].textContent = p.life;
+        const lifeText = lifeEl.querySelector('.life-val');
+        if (lifeText) lifeText.textContent = p.life;
 
         if (delta !== undefined && delta !== 0) {
             deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
@@ -1093,7 +1100,7 @@
 
         // Revive
         if (btn.classList.contains('revive-btn')) {
-            socket.emit('reset_game'); // O podríamos hacer un reset individual si el server lo soporta
+            socket.emit('revive_player', { pid });
             return;
         }
 

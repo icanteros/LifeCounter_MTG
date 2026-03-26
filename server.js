@@ -75,6 +75,17 @@ io.on('connection', (socket) => {
         socket.emit('room_created', { code });
     });
 
+    // Check occupied slots
+    socket.on('check_room', ({ code }) => {
+        const room = rooms.get(code);
+        if (room) {
+            const taken = room.players.filter(p => p.connected).map(p => p.id);
+            socket.emit('room_info', { code, taken });
+        } else {
+            socket.emit('error', { message: 'Sala no encontrada. Revisá el código.' });
+        }
+    });
+
     // Join an existing room
     socket.on('join_room', ({ code, playerSlot }) => {
         const room = rooms.get(code);
@@ -146,6 +157,19 @@ io.on('connection', (socket) => {
             p.theme = label; // Usamos label como valor de tema
         }
 
+        io.to(socket.data.roomCode).emit('game_state', { players: room.players });
+    });
+
+    // Revive individual player
+    socket.on('revive_player', ({ pid }) => {
+        const room = rooms.get(socket.data.roomCode);
+        if (!room) return;
+        const player = room.players.find(p => p.id === pid);
+        if (!player) return;
+        player.life = STARTING_LIFE;
+        player.poison = 0;
+        player.commanderTax = 0;
+        player.commanderDamage = { 1: 0, 2: 0, 3: 0, 4: 0 };
         io.to(socket.data.roomCode).emit('game_state', { players: room.players });
     });
 
