@@ -30,18 +30,28 @@
             --text-muted: #7a6e5e;
 
             /* Mana colors per player */
-            --p1-accent: #3a7bd5; --p1-glow: #1a4a9a;
-            --p2-accent: #c0392b; --p2-glow: #7a1a10;
-            --p3-accent: #27ae60; --p3-glow: #145a32;
-            --p4-accent: #8e44ad; --p4-glow: #4a1a6a;
+            --p1-accent: #3a7bd5;
+            --p1-glow: #1a4a9a;
+            --p2-accent: #c0392b;
+            --p2-glow: #7a1a10;
+            --p3-accent: #27ae60;
+            --p3-glow: #145a32;
+            --p4-accent: #8e44ad;
+            --p4-glow: #4a1a6a;
 
             /* Mana themes */
-            --w-mana: #f0f2c0; --w-glow: rgba(240, 242, 192, 0.4);
-            --u-mana: #3a7bd5; --u-glow: rgba(58, 123, 213, 0.4);
-            --b-mana: #222222; --b-glow: rgba(255, 255, 255, 0.15);
-            --r-mana: #c0392b; --r-glow: rgba(192, 57, 43, 0.4);
-            --g-mana: #27ae60; --g-glow: rgba(39, 174, 96, 0.4);
-            --c-mana: #777777; --c-glow: rgba(119, 119, 119, 0.4);
+            --w-mana: #f0f2c0;
+            --w-glow: rgba(240, 242, 192, 0.4);
+            --u-mana: #3a7bd5;
+            --u-glow: rgba(58, 123, 213, 0.4);
+            --b-mana: #222222;
+            --b-glow: rgba(255, 255, 255, 0.15);
+            --r-mana: #c0392b;
+            --r-glow: rgba(192, 57, 43, 0.4);
+            --g-mana: #27ae60;
+            --g-glow: rgba(39, 174, 96, 0.4);
+            --c-mana: #777777;
+            --c-glow: rgba(119, 119, 119, 0.4);
         }
 
         html,
@@ -362,50 +372,154 @@
         }
 
         /* ── MANA POOL ──────────────────────────────── */
-        .mana-pool { margin: 8px 0; display: flex; justify-content: center; position: relative; }
+        .mana-pool {
+            margin: 8px 0;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
         .mana-selector-btn {
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px; padding: 6px 16px; color: var(--text-primary);
-            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 6px 16px;
+            color: var(--text-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
             user-select: none;
         }
-        .mana-selector-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
-        
+
+        .mana-selector-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--gold);
+        }
+
         .mana-dropdown {
-            display: none; position: fixed; 
+            display: none;
+            position: fixed;
             width: 280px;
-            background: rgba(10,10,15,0.98);
-            z-index: 1000; padding: 15px; flex-direction: column; gap: 8px;
-            border-radius: 12px; backdrop-filter: blur(12px);
-            align-items: center; justify-content: center; border: 1px solid var(--gold);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(201,168,76,0.1);
-            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            background: rgba(10, 10, 15, 0.98);
+            z-index: 1000;
+            padding: 15px;
+            flex-direction: column;
+            gap: 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gold);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(201, 168, 76, 0.1);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             touch-action: none;
         }
-        .mana-dropdown.show { display: flex; }
-        .mana-drop-header { 
-            width: 100%; display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 5px; 
-            cursor: move; user-select: none;
+
+        .mana-dropdown.show {
+            display: flex;
         }
-        .mana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-        .mana-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 8px; width: 100%; }
-        .mana-symbol-wrap { display: flex; align-items: center; gap: 8px; }
+
+        .mana-drop-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .mana-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .mana-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 10px;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .mana-symbol-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .btn-mana {
-            width: 24px; height: 24px; border-radius: 50%; border: none;
-            font-weight: 900; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            font-weight: 900;
+            font-size: 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #000;
         }
-        .btn-mana.w { background: var(--w-mana); }
-        .btn-mana.u { background: var(--u-mana); color: #fff; }
-        .btn-mana.b { background: var(--b-mana); color: #fff; }
-        .btn-mana.r { background: var(--r-mana); color: #fff; }
-        .btn-mana.g { background: var(--g-mana); color: #fff; }
-        .btn-mana.c { background: var(--c-mana); color: #fff; }
-        .mana-val { font-size: 0.9rem; font-weight: 700; color: var(--gold); min-width: 15px; text-align: center; }
-        .mana-ctrls { display: flex; gap: 4px; }
-        .mana-close { color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+
+        .btn-mana.w {
+            background: var(--w-mana);
+        }
+
+        .btn-mana.u {
+            background: var(--u-mana);
+            color: #fff;
+        }
+
+        .btn-mana.b {
+            background: var(--b-mana);
+            color: #fff;
+        }
+
+        .btn-mana.r {
+            background: var(--r-mana);
+            color: #fff;
+        }
+
+        .btn-mana.g {
+            background: var(--g-mana);
+            color: #fff;
+        }
+
+        .btn-mana.c {
+            background: var(--c-mana);
+            color: #fff;
+        }
+
+        .mana-val {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--gold);
+            min-width: 15px;
+            text-align: center;
+        }
+
+        .mana-ctrls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .mana-close {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
 
         /* poison turns green when >= 10 */
         .poison-critical .mini-val {
@@ -415,8 +529,8 @@
 
         /* ── COMMANDER ADVANCED ───────────────────────── */
         .cmdr-adv-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
             font-size: 0.6rem;
             padding: 2px 8px;
@@ -425,13 +539,17 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        .cmdr-adv-btn:hover { color: var(--gold); border-color: var(--gold-dark); }
+
+        .cmdr-adv-btn:hover {
+            color: var(--gold);
+            border-color: var(--gold-dark);
+        }
 
         .cmdr-details {
             display: none;
             position: absolute;
             inset: 0;
-            background: rgba(10,10,15,0.95);
+            background: rgba(10, 10, 15, 0.95);
             z-index: 10;
             padding: 15px;
             flex-direction: column;
@@ -439,49 +557,171 @@
             border-radius: 12px;
             backdrop-filter: blur(4px);
         }
-        .cmdr-details.show { display: flex; }
 
-        .cmdr-det-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
-        .cmdr-det-title { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold); }
-        .cmdr-close { font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+        .cmdr-details.show {
+            display: flex;
+        }
 
-        .cmdr-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .cmdr-dmg-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 5px 8px; border-radius: 6px; }
-        .cmdr-dmg-label { font-size: 0.65rem; color: var(--text-muted); }
+        .cmdr-det-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 5px;
+        }
 
-        .tax-row { display: flex; align-items: center; justify-content: space-between; background: rgba(201, 168, 76, 0.05); padding: 8px; border-radius: 6px; border: 1px solid rgba(201, 168, 76, 0.1); }
-        .tax-label { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+        .cmdr-det-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            color: var(--gold);
+        }
+
+        .cmdr-close {
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .cmdr-matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .cmdr-dmg-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 5px 8px;
+            border-radius: 6px;
+        }
+
+        .cmdr-dmg-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .tax-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(201, 168, 76, 0.05);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(201, 168, 76, 0.1);
+        }
+
+        .tax-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
 
         /* ── LOG PANEL ────────────────────────────────── */
         #log-overlay {
-            position: fixed; top: 0; right: 0; bottom: 0; width: 300px;
-            background: #0c0c14; border-left: 1px solid rgba(201,168,76,0.2);
-            z-index: 200; transform: translateX(100%); transition: transform 0.3s;
-            display: flex; flex-direction: column;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 300px;
+            background: #0c0c14;
+            border-left: 1px solid rgba(201, 168, 76, 0.2);
+            z-index: 200;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
         }
-        #log-overlay.show { transform: translateX(0); }
-        .log-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-        #log-list { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.75rem; display: flex; flex-direction: column-reverse; gap: 6px; }
-        .log-entry { padding: 6px 8px; border-radius: 4px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--gold-dark); }
-        .log-time { color: var(--text-muted); font-size: 0.6rem; margin-right: 5px; }
+
+        #log-overlay.show {
+            transform: translateX(0);
+        }
+
+        .log-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #log-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+        }
+
+        .log-entry {
+            padding: 6px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--gold-dark);
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            margin-right: 5px;
+        }
 
         /* ── THEME BUTTON ─────────────────────────────── */
-        .theme-btn { position: absolute; top: 8px; left: 10px; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; z-index: 5; opacity: 0.4; }
-        .theme-btn:hover { opacity: 1; color: var(--gold); }
+        .theme-btn {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0.4;
+        }
+
+        .theme-btn:hover {
+            opacity: 1;
+            color: var(--gold);
+        }
 
         /* ── THEMES ───────────────────────────────────── */
-        .player[data-theme="w"] { --accent: var(--w-mana); --glow: var(--w-glow); }
-        .player[data-theme="u"] { --accent: var(--u-mana); --glow: var(--u-glow); }
-        .player[data-theme="b"] { --accent: var(--b-mana); --glow: var(--b-glow); }
-        .player[data-theme="r"] { --accent: var(--r-mana); --glow: var(--r-glow); }
-        .player[data-theme="g"] { --accent: var(--g-mana); --glow: var(--g-glow); }
-        .player[data-theme="c"] { --accent: var(--c-mana); --glow: var(--c-glow); }
+        .player[data-theme="w"] {
+            --accent: var(--w-mana);
+            --glow: var(--w-glow);
+        }
+
+        .player[data-theme="u"] {
+            --accent: var(--u-mana);
+            --glow: var(--u-glow);
+        }
+
+        .player[data-theme="b"] {
+            --accent: var(--b-mana);
+            --glow: var(--b-glow);
+        }
+
+        .player[data-theme="r"] {
+            --accent: var(--r-mana);
+            --glow: var(--r-glow);
+        }
+
+        .player[data-theme="g"] {
+            --accent: var(--g-mana);
+            --glow: var(--g-glow);
+        }
+
+        .player[data-theme="c"] {
+            --accent: var(--c-mana);
+            --glow: var(--c-glow);
+        }
 
         /* ── DEATH OVERLAY (DARK SOULS STYLE) ─────────── */
         .death-overlay {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%);
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.95) 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -519,16 +759,26 @@
         }
 
         @keyframes deathShake {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.05) rotate(1deg); }
-            75% { transform: scale(1.05) rotate(-1deg); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.05) rotate(1deg);
+            }
+
+            75% {
+                transform: scale(1.05) rotate(-1deg);
+            }
         }
 
         .revive-btn {
             margin-top: 20px;
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.4);
             padding: 5px 15px;
             border-radius: 4px;
             font-size: 0.6rem;
@@ -539,7 +789,7 @@
         }
 
         .revive-btn:hover {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-primary);
             border-color: var(--gold);
         }
@@ -708,9 +958,12 @@
         <div id="bottom-bar">
             <div style="display: flex; align-items: baseline; gap: 8px;">
                 <span id="title">⚔ MTG Life Counter</span>
-                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+                <span
+                    style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
             </div>
-            <button id="toggle-log" style="background:transparent; color:var(--gold); border:1px solid var(--gold-dark); padding:4px 10px; font-size:0.7rem; border-radius:5px;">📜 LOG</button>
+            <button id="toggle-log"
+                style="background:transparent; color:var(--gold); border:1px solid var(--gold-dark); padding:4px 10px; font-size:0.7rem; border-radius:5px;">📜
+                LOG</button>
             <button id="reset-btn">↺ Reiniciar</button>
         </div>
     </div>
@@ -757,8 +1010,8 @@
                 poison: 0,
                 commander: 0,
                 commanderTax: 0,
-                commanderDamage: { 1:0, 2:0, 3:0, 4:0 },
-                mana: { w:0, u:0, b:0, r:0, g:0, c:0 },
+                commanderDamage: { 1: 0, 2: 0, 3: 0, 4: 0 },
+                mana: { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 },
                 poisonLabel: '☠ Veneno',
                 theme: 'default'
             }));
@@ -849,7 +1102,7 @@
             <span class="mana-close" data-pid="${player.id}">&times;</span>
           </div>
           <div class="mana-grid">
-            ${['w','u','b','r','g','c'].map(c => `
+            ${['w', 'u', 'b', 'r', 'g', 'c'].map(c => `
               <div class="mana-item">
                 <div class="mana-symbol-wrap">
                   <div class="btn-mana ${c}">${c.toUpperCase()}</div>
@@ -938,7 +1191,7 @@
             card.dataset.theme = s.theme || '';
 
             // Update Mana values
-            ['w','u','b','r','g','c'].forEach(color => {
+            ['w', 'u', 'b', 'r', 'g', 'c'].forEach(color => {
                 const mEl = document.getElementById(`mana-${id}-${color}`);
                 if (mEl) mEl.textContent = s.mana[color];
             });
@@ -1004,7 +1257,7 @@
             }
 
             // Mana
-            ['w','u','b','r','g','c'].forEach(m => {
+            ['w', 'u', 'b', 'r', 'g', 'c'].forEach(m => {
                 const mel = document.getElementById(`mana-${id}-${m}`);
                 if (mel) mel.textContent = s.mana[m];
             });
@@ -1014,7 +1267,7 @@
                 if (other.id === id) return;
                 const lbl = document.getElementById(`cmdr-lbl-${id}-${other.id}`);
                 if (lbl) lbl.textContent = `VS ${other.name}`;
-                
+
                 const dmgEl = document.getElementById(`cmdr-dmg-${id}-${other.id}`);
                 if (dmgEl) dmgEl.textContent = s.commanderDamage[other.id] || 0;
             });
@@ -1053,7 +1306,7 @@
                 const target = btn.dataset.target;
                 const other = state.find(p => p.id == target);
                 s.commanderDamage[target] = Math.max(0, s.commanderDamage[target] + delta);
-                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Daño Cmdr de ${other ? other.name : 'P'+target}`;
+                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Daño Cmdr de ${other ? other.name : 'P' + target}`;
                 render(pid, 0, logMsg);
             } else if (type === 'tax') {
                 s.commanderTax = Math.max(0, s.commanderTax + delta);
@@ -1127,7 +1380,7 @@
             if (e.target.classList.contains('player-name')) {
                 pState.name = e.target.value;
                 // Al cambiar el nombre, actualizamos los labels en todos los jugadores
-                renderAll(); 
+                renderAll();
             } else if (e.target.classList.contains('mini-label-input')) {
                 pState.poisonLabel = e.target.value;
             }
@@ -1139,13 +1392,13 @@
             if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) {
                 document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
             }
-            
+
             // Revive / Reset individual player
             if (e.target.classList.contains('revive-btn')) {
                 const pid = parseInt(e.target.dataset.pid);
                 const s = state.find(p => p.id === pid);
                 s.life = STARTING_LIFE;
-                s.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
+                s.commanderDamage = { 1: 0, 2: 0, 3: 0, 4: 0 };
                 // Also reset poison if needed (though hidden)
                 s.poison = 0;
                 render(pid);
@@ -1197,8 +1450,8 @@
                 s.poison = 0;
                 s.commander = 0;
                 s.commanderTax = 0;
-                s.commanderDamage = { 1:0, 2:0, 3:0, 4:0 };
-                s.mana = { w:0, u:0, b:0, r:0, g:0, c:0 };
+                s.commanderDamage = { 1: 0, 2: 0, 3: 0, 4: 0 };
+                s.mana = { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
                 s.poisonLabel = '☠ Veneno';
                 s.theme = 'default';
 
@@ -1228,12 +1481,12 @@
             const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
             startX = clientX;
             startY = clientY;
-            
+
             const style = window.getComputedStyle(activeDrag);
             const matrix = new DOMMatrixReadOnly(style.transform);
             initialX = matrix.m41;
             initialY = matrix.m42;
-            
+
             activeDrag.style.transition = 'none';
         }
 
@@ -1241,10 +1494,10 @@
             if (!activeDrag) return;
             const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
             const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-            
+
             const dx = clientX - startX;
             const dy = clientY - startY;
-            
+
             activeDrag.style.transform = `translate(calc(-50% + ${initialX + dx}px), calc(-50% + ${initialY + dy}px))`;
         }
 

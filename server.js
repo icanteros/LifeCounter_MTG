@@ -56,6 +56,9 @@ function generateRoomCode() {
     return code;
 }
 
+// ── Health Check ────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 // ── Static files ────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 

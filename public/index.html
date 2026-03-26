@@ -908,25 +908,49 @@
                         `).join('')}
                     </div>
                 </div>
-                </div>
             </div>
 
             <div class="counters-row">
-                    <span class="mini-label">☠ Veneno</span>
+                <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
+                    <input class="mini-label-input" id="label-poison-${player.id}" value="${player.poisonLabel || '☠ Veneno'}" 
+                           data-pid="${player.id}" data-type="poisonLabel" maxlength="15" ${isMe ? '' : 'disabled'} />
                     <div class="mini-controls">
                         <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
                         <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
                         <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
                     </div>
                 </div>
-                <div class="mini-counter">
-                    <span class="mini-label">⚔ Cmdr</span>
+
+                <div class="mini-counter" id="tax-wrap-${player.id}">
+                    <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
                     <div class="mini-controls">
                         <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
                         <span class="mini-val" id="tax-${player.id}">${player.commanderTax || 0}</span>
                         <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
                     </div>
                 </div>
+
+                <div class="mini-counter">
+                    <button class="cmdr-adv-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>⚔ Comandante</button>
+                </div>
+            </div>
+
+            <!-- Advanced Commander UI -->
+            <div class="cmdr-details" id="cmdr-det-${player.id}">
+                <div class="cmdr-det-header">
+                    <span class="cmdr-det-title">Stats de Comandante</span>
+                    <span class="cmdr-close">&times;</span>
+                </div>
+
+                <div class="cmdr-det-title" style="font-size:0.6rem; margin-top:5px;">Daño Recibido De</div>
+                <div class="cmdr-matrix" id="cmdr-matrix-${player.id}">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </div>
+
+            <div class="death-overlay" id="death-${player.id}">
+                <div class="death-text">HAS MUERTO</div>
+                <button class="revive-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>Reiniciar Jugador</button>
             </div>
         `;
 

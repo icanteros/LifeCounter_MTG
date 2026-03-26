@@ -2,15 +2,14 @@
   "name": "mtg-life-counter-multiplayer",
   "version": "2.0.0",
   "engines": {
-    "node": "18.20.8"
+    "node": "18.x"
   },
   "description": "MTG Life Counter — Multiplayer en tiempo real",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "postinstall": "node -e \"process.exit(0)\""
+    "test:ui": "playwright test --ui"
   },
   "dependencies": {
     "express": "^4.18.2",
