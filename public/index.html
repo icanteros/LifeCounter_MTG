@@ -465,13 +465,22 @@
         .mana-selector-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
         
         .mana-dropdown {
-            display: none; position: absolute; inset: 0; background: rgba(10,10,15,0.98);
-            z-index: 100; padding: 15px; flex-direction: column; gap: 8px;
-            border-radius: 12px; backdrop-filter: blur(8px);
+            display: none; position: fixed; 
+            width: 280px;
+            background: rgba(10,10,15,0.98);
+            z-index: 1000; padding: 15px; flex-direction: column; gap: 8px;
+            border-radius: 12px; backdrop-filter: blur(12px);
             align-items: center; justify-content: center; border: 1px solid var(--gold);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(201,168,76,0.1);
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            touch-action: none;
         }
         .mana-dropdown.show { display: flex; }
-        .mana-drop-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
+        .mana-drop-header { 
+            width: 100%; display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 5px; 
+            cursor: move; user-select: none;
+        }
         .mana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
         .mana-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 8px; width: 100%; }
         .mana-symbol-wrap { display: flex; align-items: center; gap: 8px; }
@@ -1123,6 +1132,60 @@
         if (!myRoomCode) return;
         navigator.clipboard.writeText(myRoomCode).then(() => showToast('✓ Código copiado: ' + myRoomCode));
     });
+
+    // ─────────────────────────────────────────────
+    // DRAGGABLE MANA WINDOW
+    // ─────────────────────────────────────────────
+    let activeDrag = null;
+    let startX, startY, initialX, initialY;
+
+    function startDragging(e) {
+        const header = e.target.closest('.mana-drop-header');
+        if (!header) return;
+
+        activeDrag = header.closest('.mana-dropdown');
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        startX = clientX;
+        startY = clientY;
+        
+        const style = window.getComputedStyle(activeDrag);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        initialX = matrix.m41;
+        initialY = matrix.m42;
+        
+        activeDrag.style.transition = 'none';
+        activeDrag.style.zIndex = '2000'; // Bring to front
+    }
+
+    function doDragging(e) {
+        if (!activeDrag) return;
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        
+        activeDrag.style.transform = `translate(calc(-50% + ${initialX + dx}px), calc(-50% + ${initialY + dy}px))`;
+    }
+
+    function stopDragging() {
+        if (!activeDrag) return;
+        activeDrag.style.transition = '';
+        activeDrag = null;
+    }
+
+    document.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', doDragging);
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchstart', startDragging, { passive: false });
+    document.addEventListener('touchmove', (e) => {
+        if (activeDrag) {
+            e.preventDefault();
+            doDragging(e);
+        }
+    }, { passive: false });
+    document.addEventListener('touchend', stopDragging);
 
     // ─────────────────────────────────────────────
     // TOUCH: prevent scroll/zoom on grid
