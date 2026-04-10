@@ -1057,8 +1057,28 @@
     // ─────────────────────────────────────────────
     grid.addEventListener('click', e => {
         const btn = e.target.closest('button');
-        if (!btn || btn.disabled) return;
+        const closeBtn = e.target.closest('.cmdr-close');
+        const manaClose = e.target.closest('.mana-close');
+        
+        if (!btn && !closeBtn && !manaClose) return;
+        if (btn && btn.disabled) return;
 
+        // Commander detail close
+        if (closeBtn || (btn && btn.classList.contains('cmdr-close'))) {
+            const pid = closeBtn ? parseInt(closeBtn.closest('.cmdr-details').id.replace('cmdr-det-', '')) : parseInt(btn.closest('.cmdr-details').id.replace('cmdr-det-', ''));
+            document.getElementById(`cmdr-det-${pid}`).classList.remove('show');
+            return;
+        }
+
+        // Mana dropdown close
+        if (manaClose) {
+            const pid = parseInt(manaClose.closest('.mana-dropdown').id.replace('mana-drop-', ''));
+            manaClose.closest('.mana-dropdown').classList.remove('show');
+            return;
+        }
+
+        if (!btn) return;
+        
         const pid = parseInt(btn.dataset.pid);
         const type = btn.dataset.type;
         const delta = parseInt(btn.dataset.delta);
@@ -1072,19 +1092,10 @@
             drop.classList.add('show');
             return;
         }
-        if (btn.classList.contains('mana-close')) {
-            const drop = document.getElementById(`mana-drop-${pid}`);
-            drop.classList.remove('show');
-            return;
-        }
 
         // Commander detail toggle
         if (btn.classList.contains('cmdr-adv-btn')) {
             document.getElementById(`cmdr-det-${pid}`).classList.add('show');
-            return;
-        }
-        if (btn.classList.contains('cmdr-close')) {
-            document.getElementById(`cmdr-det-${pid}`).classList.remove('show');
             return;
         }
 
