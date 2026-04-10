@@ -296,15 +296,10 @@
         }
 
         .player::after {
-            content: '';
             position: absolute; top: 0; left: 0; right: 0;
             height: 3px; border-radius: 12px 12px 0 0;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
         }
-
-        .player[data-player="1"]::after { background: linear-gradient(90deg, transparent, var(--p1-accent), transparent); }
-        .player[data-player="2"]::after { background: linear-gradient(90deg, transparent, var(--p2-accent), transparent); }
-        .player[data-player="3"]::after { background: linear-gradient(90deg, transparent, var(--p3-accent), transparent); }
-        .player[data-player="4"]::after { background: linear-gradient(90deg, transparent, var(--p4-accent), transparent); }
 
         .player.danger { background: #1a0808; }
         .player.danger .life-display { color: #ff6b6b !important; text-shadow: 0 0 30px #ff4444; }
@@ -903,7 +898,7 @@
                         ${['w','u','b','r','g','c'].map(c => `
                             <div class="mana-item">
                                 <div class="mana-symbol-wrap">
-                                    <div class="btn-mana ${c}">${c.toUpperCase()}</div>
+                                    <div class="btn-mana ${c}" data-pid="${player.id}" data-color="${c}">${c.toUpperCase()}</div>
                                     <span class="mana-val" id="mana-${player.id}-${c}">${player.mana ? player.mana[c] : 0}</span>
                                 </div>
                                 <div class="mana-ctrls">
@@ -1057,10 +1052,11 @@
     // ─────────────────────────────────────────────
     grid.addEventListener('click', e => {
         const btn = e.target.closest('button');
+        const themeBtn = e.target.closest('.theme-btn');
         const closeBtn = e.target.closest('.cmdr-close');
         const manaClose = e.target.closest('.mana-close');
         
-        if (!btn && !closeBtn && !manaClose) return;
+        if (!btn && !themeBtn && !closeBtn && !manaClose) return;
         if (btn && btn.disabled) return;
 
         // Commander detail close
@@ -1100,7 +1096,8 @@
         }
 
         // Theme picker
-        if (btn.classList.contains('theme-btn')) {
+        if (themeBtn) {
+            const pid = parseInt(themeBtn.dataset.pid);
             const card = document.getElementById(`player-${pid}`);
             const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
             const current = card.dataset.theme || 'default';
