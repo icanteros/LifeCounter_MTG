@@ -1,35 +1,71 @@
 # Dependencias
 node_modules/
+jspm_packages/
+.pnp/
+.pnp.js
 
-# Variables de entorno
+# Variables de entorno y Secretos
 .env
 .env.local
 .env.*.local
 .env.production
+.env.development
+.env.test
+*.env
+*.env.*
+.secrets
+secrets.*
+*.key
+*.pem
+*.cert
 
-# Logs
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Logs y Debugging
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 *.log
+logs/
+*.lcov
 
 # Sistema operativo
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+desktop.ini
 
-# Playwright
+# Playwright / Testing
 test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
 test_results.*
+coverage/
+.nyc_output
 
-# Otros
-.temp/
+# Build y Cache
+dist/
+build/
 .cache/
+.temp/
+.tmp/
+.next/
+.nuxt/
+.parcel-cache/
+.turbo/
 
-# Despliegue
+# Despliegue y Plataformas
 .vercel/
 .netlify/
 .serverpress/
 .railway/
+render.yaml.bak

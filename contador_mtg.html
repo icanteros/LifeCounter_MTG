@@ -61,7 +61,6 @@
             background: var(--bg-deep);
             font-family: 'Rajdhani', sans-serif;
             color: var(--text-primary);
-            overflow: hidden;
         }
 
         /* ── LAYOUT ────────────────────────────────────── */
@@ -70,6 +69,8 @@
             flex-direction: column;
             width: 100dvw;
             height: 100dvh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         #grid {
@@ -80,6 +81,76 @@
             gap: 3px;
             padding: 3px;
             background: var(--bg-deep);
+            transition: all 0.3s ease;
+        }
+
+        /* ── FOCUS MODE ───────────────────────────────────── */
+        #grid.has-focus .player:not(.focused) {
+            display: none;
+        }
+
+        #grid.has-focus {
+            grid-template-columns: 1fr !important;
+            grid-template-rows: 1fr !important;
+            padding: 0;
+        }
+
+        .player.focused {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            border-radius: 0;
+            width: 100vw;
+            height: calc(100vh - 45px);
+            /* Space for bottom bar */
+        }
+
+        .focus-btn {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .focus-btn:hover {
+            opacity: 1;
+            color: var(--gold);
+        }
+
+        .player.focused .focus-btn {
+            color: var(--gold);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            #grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                min-height: 100%;
+            }
+
+            .player {
+                min-height: 25vh;
+            }
+
+            .life-display {
+                font-size: clamp(3rem, 12vh, 5.5rem);
+            }
+
+            .btn-main {
+                width: clamp(40px, 18vw, 70px);
+                height: clamp(40px, 8vh, 55px);
+            }
+
+            .player {
+                gap: 5px;
+                padding: 10px 5px 5px;
+            }
         }
 
         /* ── PLAYER CARD ───────────────────────────────── */
@@ -90,11 +161,13 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background: var(--bg-card);
+            background-color: var(--bg-card);
             border-radius: 12px;
             overflow: hidden;
             padding: 14px 10px 10px;
-            transition: background 0.3s;
+            transition: background 0.3s, background-image 0.5s;
+            background-size: cover;
+            background-position: center;
         }
 
         .player::before {
@@ -109,6 +182,93 @@
                     transparent 10px,
                     rgba(255, 255, 255, 0.03) 10px,
                     rgba(255, 255, 255, 0.03) 20px);
+            z-index: 1;
+        }
+
+        .player.has-bg::before {
+            opacity: 0.6;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        .player-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* ── SEARCH UI ────────────────────────────────────── */
+        .search-container {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .search-input {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--gold-dark);
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: white;
+            font-size: 0.75rem;
+            width: 100%;
+            outline: none;
+        }
+
+        .search-results {
+            background: rgba(16, 16, 26, 0.98);
+            border: 1px solid var(--gold-dark);
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .search-results.show {
+            display: flex;
+        }
+
+        .search-item {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
+            text-align: left;
+        }
+
+        .search-item:hover {
+            background: rgba(201, 168, 76, 0.25);
+        }
+
+        .cmdr-btn {
+            position: absolute;
+            top: 8px;
+            left: 35px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .cmdr-btn:hover {
+            opacity: 1;
+            color: var(--gold);
         }
 
         /* Accent border top */
@@ -247,6 +407,7 @@
             transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         button:active {
@@ -912,17 +1073,6 @@
             border-color: rgba(255, 255, 255, 0.25);
         }
 
-        /* ── MOBILE: rotate cards on portrait ──────────── */
-        /* Players 3 & 4 (bottom row) are rotated 180° on landscape screens
-       so opponents can read across the table */
-        @media (orientation: landscape) and (min-width: 600px) {
-
-            .player[data-player="3"],
-            .player[data-player="4"] {
-                transform: rotate(180deg);
-            }
-        }
-
         /* Tighten spacing on very small screens */
         @media (max-width: 400px) {
             .player {
@@ -947,7 +1097,7 @@
             <div style="display: flex; align-items: baseline; gap: 8px;">
                 <span id="title">⚔ MTG Life Counter</span>
                 <span
-                    style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+                    style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.2.0</span>
             </div>
             <button id="toggle-log"
                 style="background:transparent; color:var(--gold); border:1px solid var(--gold-dark); padding:4px 10px; font-size:0.7rem; border-radius:5px;">📜
@@ -1001,17 +1151,16 @@
                 commanderDamage: { 1: 0, 2: 0, 3: 0, 4: 0 },
                 mana: { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 },
                 poisonLabel: '☠ Veneno',
-                theme: 'default'
+                theme: 'default',
+                commanderImage: null
             }));
 
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Merge parsed with defaults to ensure all fields exist
                     return parsed.map((p, i) => ({
                         ...defaults[i],
                         ...p,
-                        // Deep merge for nested objects if they exist
                         commanderDamage: { ...defaults[i].commanderDamage, ...(p.commanderDamage || {}) },
                         mana: { ...defaults[i].mana, ...(p.mana || {}) }
                     }));
@@ -1039,6 +1188,7 @@
 
         function renderLog() {
             const list = document.getElementById('log-list');
+            if (!list) return;
             list.innerHTML = logData.map(e => `
                 <div class="log-entry">
                     <span class="log-time">${e.time}</span> ${e.msg}
@@ -1051,10 +1201,13 @@
 
         function createPlayerCard(player) {
             const el = document.createElement('div');
-            el.className = 'player';
+            el.className = 'player' + (player.commanderImage ? ' has-bg' : '');
             el.dataset.player = player.id;
             el.dataset.theme = player.theme || '';
             el.id = `player-${player.id}`;
+            if (player.commanderImage) {
+                el.style.backgroundImage = `url(${player.commanderImage})`;
+            }
 
             // Commander damage matrix
             const enemies = state.filter(p => p.id !== player.id);
@@ -1070,72 +1223,76 @@
             `).join('');
 
             el.innerHTML = `
-      <div class="theme-btn" data-pid="${player.id}">🎨</div>
-      <div class="player-name-wrap">
-        <input class="player-name" type="text" value="${player.name}"
-               placeholder="Jugador ${player.id}"
-               maxlength="20" aria-label="Nombre del jugador ${player.id}" />
-      </div>
+      <div class="theme-btn" data-pid="${player.id}" title="Cambiar Tema">🎨</div>
+      <div class="cmdr-btn" data-pid="${player.id}" title="Buscar Comandante">🎴</div>
+      <div class="focus-btn" data-pid="${player.id}" title="Enfocar Jugador">🔍</div>
+      
+      <div class="player-content">
+        <div class="player-name-wrap">
+            <input class="player-name" type="text" value="${player.name}"
+                placeholder="Jugador ${player.id}"
+                maxlength="24" aria-label="Nombre del jugador ${player.id}" />
+        </div>
 
-      <div class="life-display" id="life-${player.id}">
-        ${player.life}
-        <span class="delta" id="delta-${player.id}"></span>
-      </div>
+        <div class="life-display" id="life-${player.id}">
+            ${player.life}
+            <span class="delta" id="delta-${player.id}"></span>
+        </div>
 
-      <div class="mana-pool">
-        <button class="mana-selector-btn" data-pid="${player.id}">💎 MANA</button>
-        <div class="mana-dropdown" id="mana-drop-${player.id}">
-          <div class="mana-drop-header">
-            <span class="cmdr-det-title">Reserva de Maná</span>
-            <span class="mana-close" data-pid="${player.id}">&times;</span>
-          </div>
-          <div class="mana-grid">
-            ${['w', 'u', 'b', 'r', 'g', 'c'].map(c => `
-              <div class="mana-item">
-                <div class="mana-symbol-wrap">
-                  <div class="btn-mana ${c}" data-pid="${player.id}" data-color="${c}">${c.toUpperCase()}</div>
-                  <span class="mana-val" id="mana-${player.id}-${c}">${player.mana[c]}</span>
+        <div class="mana-pool">
+            <button class="mana-selector-btn" data-pid="${player.id}">💎 MANA</button>
+            <div class="mana-dropdown" id="mana-drop-${player.id}">
+            <div class="mana-drop-header">
+                <span class="cmdr-det-title">Reserva de Maná</span>
+                <span class="mana-close" data-pid="${player.id}">&times;</span>
+            </div>
+            <div class="mana-grid">
+                ${['w', 'u', 'b', 'r', 'g', 'c'].map(c => `
+                <div class="mana-item">
+                    <div class="mana-symbol-wrap">
+                    <div class="btn-mana ${c}" data-pid="${player.id}" data-color="${c}">${c.toUpperCase()}</div>
+                    <span class="mana-val" id="mana-${player.id}-${c}">${player.mana[c]}</span>
+                    </div>
+                    <div class="mana-ctrls">
+                    <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1">−</button>
+                    <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1">+</button>
+                    </div>
                 </div>
-                <div class="mana-ctrls">
-                  <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1">−</button>
-                  <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1">+</button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn-fast" data-pid="${player.id}" data-delta="-5">−5</button>
-        <button class="btn-main" data-pid="${player.id}" data-delta="-1">−</button>
-        <button class="btn-main" data-pid="${player.id}" data-delta="+1">+</button>
-        <button class="btn-fast" data-pid="${player.id}" data-delta="+5">+5</button>
-      </div>
-
-      <div class="counters-row">
-        <!-- Contador de veneno oculto internamente -->
-        <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
-          <input class="mini-label-input" value="${player.poisonLabel || '☠ Veneno'}" 
-                 data-pid="${player.id}" data-type="poisonLabel" maxlength="15" />
-          <div class="mini-controls">
-            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1">−</button>
-            <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
-            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1">+</button>
-          </div>
+                `).join('')}
+            </div>
+            </div>
         </div>
 
-        <div class="mini-counter" id="tax-wrap-${player.id}">
-          <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
-          <div class="mini-controls">
-            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1">−</button>
-            <span class="mini-val" id="tax-${player.id}">${player.commanderTax}</span>
-            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1">+</button>
-          </div>
+        <div class="btn-row">
+            <button class="btn-fast" data-pid="${player.id}" data-delta="-5">−5</button>
+            <button class="btn-main" data-pid="${player.id}" data-delta="-1">−</button>
+            <button class="btn-main" data-pid="${player.id}" data-delta="+1">+</button>
+            <button class="btn-fast" data-pid="${player.id}" data-delta="+5">+5</button>
         </div>
 
-        <div class="mini-counter">
-          <button class="cmdr-adv-btn" data-pid="${player.id}">⚔ Comandante</button>
+        <div class="counters-row">
+            <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
+            <input class="mini-label-input" value="${player.poisonLabel || '☠ Veneno'}" 
+                    data-pid="${player.id}" data-type="poisonLabel" maxlength="15" />
+            <div class="mini-controls">
+                <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1">−</button>
+                <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
+                <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1">+</button>
+            </div>
+            </div>
+
+            <div class="mini-counter" id="tax-wrap-${player.id}">
+            <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
+            <div class="mini-controls">
+                <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1">−</button>
+                <span class="mini-val" id="tax-${player.id}">${player.commanderTax}</span>
+                <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1">+</button>
+            </div>
+            </div>
+
+            <div class="mini-counter">
+            <button class="cmdr-adv-btn" data-pid="${player.id}">⚔ Comandante</button>
+            </div>
         </div>
       </div>
 
@@ -1156,6 +1313,11 @@
         <div class="death-text">HAS MUERTO</div>
         <button class="revive-btn" data-pid="${player.id}">Reiniciar Jugador</button>
       </div>
+
+      <div class="search-container" id="search-container-${player.id}" style="display:none;">
+          <input type="text" class="search-input" placeholder="Buscar comandante..." id="search-input-${player.id}">
+          <div class="search-results" id="search-results-${player.id}"></div>
+      </div>
     `;
 
             return el;
@@ -1174,18 +1336,28 @@
             const poisonWrap = document.getElementById(`poison-wrap-${id}`);
             const card = document.getElementById(`player-${id}`);
             const taxEl = document.getElementById(`tax-${id}`);
+            const nameInput = card.querySelector('.player-name');
 
-            // New fields
             card.dataset.theme = s.theme || '';
 
-            // Update Mana values
+            // Name Sync
+            if (nameInput && document.activeElement !== nameInput) {
+                nameInput.value = s.name;
+            }
+
+            if (s.commanderImage) {
+                card.style.backgroundImage = `url("${s.commanderImage}")`;
+                card.classList.add('has-bg');
+            } else {
+                card.style.backgroundImage = '';
+                card.classList.remove('has-bg');
+            }
+
             ['w', 'u', 'b', 'r', 'g', 'c'].forEach(color => {
                 const mEl = document.getElementById(`mana-${id}-${color}`);
                 if (mEl) mEl.textContent = s.mana[color];
             });
 
-            // Update Commander Damage matrix
-            const matrix = document.querySelector(`#cmdr-det-${id} .mana-grid`); // Reusing mana-grid class for layout
             const matrixContainer = document.querySelector(`#cmdr-det-${id} .cmdr-matrix`);
             if (matrixContainer) {
                 matrixContainer.innerHTML = state.filter(other => other.id !== id).map(other => `
@@ -1200,13 +1372,9 @@
                 `).join('');
             }
 
-            // Life number
             if (lifeEl) lifeEl.childNodes[0].textContent = s.life;
-
-            // Danger mode
             card.classList.toggle('danger', s.life <= 5);
 
-            // Delta badge
             if (delta !== undefined && deltaEl) {
                 deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
                 deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
@@ -1216,48 +1384,29 @@
                 }, 1200);
             }
 
-            // Bump animation
             if (lifeEl) {
                 lifeEl.classList.remove('bump');
-                void lifeEl.offsetWidth; // reflow
+                void lifeEl.offsetWidth;
                 lifeEl.classList.add('bump');
-                clearTimeout(lifeEl._bumpTimeout);
-                lifeEl._bumpTimeout = setTimeout(() => lifeEl.classList.remove('bump'), 120);
             }
 
-            // Mini counters
             if (poisonEl) poisonEl.textContent = s.poison;
             if (poisonWrap) poisonWrap.classList.toggle('poison-critical', s.poison >= 10);
             if (taxEl) taxEl.textContent = s.commanderTax || 0;
 
-            // Death detection
-            const hasLostByLife = s.life <= 0;
-            const hasLostByCmdr = Object.values(s.commanderDamage).some(v => v >= 21);
-            const isDead = hasLostByLife || hasLostByCmdr;
+            const isDead = s.life <= 0 || Object.values(s.commanderDamage).some(v => v >= 21);
             const deathOverlay = document.getElementById(`death-${id}`);
             if (deathOverlay) {
-                const alreadyDead = deathOverlay.classList.contains('show');
-                if (isDead && !alreadyDead) {
-                    const reason = hasLostByLife ? 'Vida 0' : 'Daño Cmdr 21+';
-                    addToLog(`💀 ${s.name} HA MUERTO (${reason})`);
+                if (isDead && !deathOverlay.classList.contains('show')) {
+                    addToLog(`💀 ${s.name} HA MUERTO`);
                 }
                 deathOverlay.classList.toggle('show', isDead);
             }
 
-            // Mana
-            ['w', 'u', 'b', 'r', 'g', 'c'].forEach(m => {
-                const mel = document.getElementById(`mana-${id}-${m}`);
-                if (mel) mel.textContent = s.mana[m];
-            });
-
-            // Update opponent labels (Name Sync) and damage values
             state.forEach(other => {
                 if (other.id === id) return;
                 const lbl = document.getElementById(`cmdr-lbl-${id}-${other.id}`);
                 if (lbl) lbl.textContent = `VS ${other.name}`;
-
-                const dmgEl = document.getElementById(`cmdr-dmg-${id}-${other.id}`);
-                if (dmgEl) dmgEl.textContent = s.commanderDamage[other.id] || 0;
             });
 
             if (logMsg) addToLog(logMsg);
@@ -1268,253 +1417,192 @@
             renderLog();
         }
 
-        // ── Events: life buttons ─────────────────────────────
+        // ── Events ───────────────────────────────────────────
         grid.addEventListener('click', e => {
             const btn = e.target.closest('button[data-delta]');
-            if (!btn) return;
+            if (btn) {
+                const pid = parseInt(btn.dataset.pid);
+                const type = btn.dataset.type;
+                const delta = parseInt(btn.dataset.delta);
+                const s = state.find(p => p.id === pid);
+                let logMsg = '';
 
-            const pid = parseInt(btn.dataset.pid);
-            const type = btn.dataset.type; // undefined | poison | tax | mana | cmdrDmg
-            const delta = parseInt(btn.dataset.delta);
-            const s = state.find(p => p.id === pid);
-            let logMsg = '';
-
-            if (!type) {
-                // Main life buttons
-                s.life = Math.max(-999, s.life + delta);
-                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Vida`;
-                render(pid, delta, logMsg);
-            } else if (type === 'mana') {
-                const color = btn.dataset.color;
-                s.mana[color] = Math.max(0, s.mana[color] + delta);
-                // No log for every single mana click to avoid spam? 
-                // Or maybe just small log? Let's skip mana log for now unless requested.
-                render(pid);
-            } else if (type === 'cmdrDmg') {
-                const target = btn.dataset.target;
-                const other = state.find(p => p.id == target);
-                s.commanderDamage[target] = Math.max(0, s.commanderDamage[target] + delta);
-                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Daño Cmdr de ${other ? other.name : 'P' + target}`;
-                render(pid, 0, logMsg);
-            } else if (type === 'tax') {
-                s.commanderTax = Math.max(0, s.commanderTax + delta);
-                logMsg = `${s.name}: Muertes Cmdr ${delta > 0 ? '+1' : '-1'}`;
-                render(pid, 0, logMsg);
-            } else {
-                // Poison
-                s[type] = Math.max(0, s[type] + delta);
-                logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} ${s.poisonLabel}`;
-                render(pid, 0, logMsg);
-            }
-            saveState();
-        });
-
-        // ── Events: UI Interactions (Log, Themes, Cmdr Adv) ────
-        document.getElementById('toggle-log').addEventListener('click', () => {
-            document.getElementById('log-overlay').classList.add('show');
-        });
-        document.getElementById('close-log').addEventListener('click', () => {
-            document.getElementById('log-overlay').classList.remove('show');
-        });
-
-        grid.addEventListener('click', e => {
-            // Mana selector toggle
-            if (e.target.classList.contains('mana-selector-btn')) {
-                const pid = parseInt(e.target.dataset.pid);
-                const dropdown = document.getElementById(`mana-drop-${pid}`);
-                document.querySelectorAll('.mana-dropdown').forEach(d => {
-                    if (d !== dropdown) d.classList.remove('show');
-                });
-                dropdown.classList.add('show');
-                return;
-            }
-            if (e.target.classList.contains('mana-close')) {
-                const pid = parseInt(e.target.dataset.pid);
-                document.getElementById(`mana-drop-${pid}`).classList.remove('show');
+                if (!type) {
+                    s.life = Math.max(-999, s.life + delta);
+                    logMsg = `${s.name}: ${delta > 0 ? '+' : ''}${delta} Vida`;
+                    render(pid, delta, logMsg);
+                } else if (type === 'mana') {
+                    const color = btn.dataset.color;
+                    s.mana[color] = Math.max(0, s.mana[color] + delta);
+                    render(pid);
+                } else if (type === 'cmdrDmg') {
+                    const target = btn.dataset.target;
+                    s.commanderDamage[target] = Math.max(0, s.commanderDamage[target] + delta);
+                    render(pid);
+                } else if (type === 'tax') {
+                    s.commanderTax = Math.max(0, s.commanderTax + delta);
+                    render(pid);
+                } else if (type === 'poison') {
+                    s.poison = Math.max(0, s.poison + delta);
+                    render(pid);
+                }
+                saveState();
                 return;
             }
 
-            // Theme picker
             const themeBtn = e.target.closest('.theme-btn');
             if (themeBtn) {
                 const pid = parseInt(themeBtn.dataset.pid);
                 const s = state.find(p => p.id === pid);
                 const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
-                const idx = themes.indexOf(s.theme || 'default');
-                s.theme = themes[(idx + 1) % themes.length];
-                render(pid);
-                saveState();
+                s.theme = themes[(themes.indexOf(s.theme || 'default') + 1) % themes.length];
+                render(pid); saveState(); return;
+            }
+
+            const focusBtn = e.target.closest('.focus-btn');
+            if (focusBtn) {
+                const pid = parseInt(focusBtn.dataset.pid);
+                const card = document.getElementById(`player-${pid}`);
+                const isFocused = card.classList.contains('focused');
+                document.querySelectorAll('.player').forEach(p => p.classList.remove('focused'));
+                grid.classList.toggle('has-focus', !isFocused);
+                if (!isFocused) card.classList.add('focused');
+                focusBtn.textContent = isFocused ? '🔍' : '❌';
                 return;
             }
 
-            // Commander advanced UI toggle
-            if (e.target.classList.contains('cmdr-adv-btn')) {
+            const cmdrBtn = e.target.closest('.cmdr-btn');
+            if (cmdrBtn) {
+                const pid = parseInt(cmdrBtn.dataset.pid);
+                const container = document.getElementById(`search-container-${pid}`);
+                const isVisible = container.style.display !== 'none';
+                container.style.display = isVisible ? 'none' : 'flex';
+                if (!isVisible) document.getElementById(`search-input-${pid}`).focus();
+                return;
+            }
+
+            const searchItem = e.target.closest('.search-item');
+            if (searchItem) {
+                const pid = parseInt(searchItem.closest('.search-container').id.replace('search-container-', ''));
+                const s = state.find(p => p.id === pid);
+                s.name = searchItem.dataset.name;
+                s.commanderImage = searchItem.dataset.img;
+                document.getElementById(`player-${pid}`).querySelector('.player-name').value = s.name;
+                document.getElementById(`search-container-${pid}`).style.display = 'none';
+                renderAll(); saveState(); return;
+            }
+
+            if (e.target.classList.contains('mana-selector-btn')) {
                 const pid = parseInt(e.target.dataset.pid);
-                document.getElementById(`cmdr-det-${pid}`).classList.add('show');
+                document.getElementById(`mana-drop-${pid}`).classList.add('show');
+                return;
+            }
+            if (e.target.classList.contains('mana-close')) {
+                document.getElementById(`mana-drop-${e.target.dataset.pid}`).classList.remove('show');
+                return;
+            }
+            if (e.target.classList.contains('cmdr-adv-btn')) {
+                document.getElementById(`cmdr-det-${e.target.dataset.pid}`).classList.add('show');
                 return;
             }
             if (e.target.classList.contains('cmdr-close')) {
                 e.target.closest('.cmdr-details').classList.remove('show');
                 return;
             }
-        });
-
-        // ── Events: inputs (names and labels) ────────────────
-        grid.addEventListener('input', e => {
-            const card = e.target.closest('.player');
-            if (!card) return;
-            const pid = parseInt(card.dataset.player);
-            const pState = state.find(p => p.id === pid);
-
-            if (e.target.classList.contains('player-name')) {
-                pState.name = e.target.value;
-                // Al cambiar el nombre, actualizamos los labels en todos los jugadores
-                renderAll();
-            } else if (e.target.classList.contains('mini-label-input')) {
-                pState.poisonLabel = e.target.value;
-            }
-            saveState();
-        });
-
-        // Close dropdowns clicking outside
-        window.addEventListener('click', e => {
-            if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) {
-                document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
-            }
-
-            // Revive / Reset individual player
             if (e.target.classList.contains('revive-btn')) {
                 const pid = parseInt(e.target.dataset.pid);
                 const s = state.find(p => p.id === pid);
                 s.life = STARTING_LIFE;
                 s.commanderDamage = { 1: 0, 2: 0, 3: 0, 4: 0 };
-                // Also reset poison if needed (though hidden)
                 s.poison = 0;
-                render(pid);
-                saveState();
+                render(pid); saveState(); return;
             }
         });
 
-        // Right click mana to subtract
-        grid.addEventListener('contextmenu', e => {
-            const btn = e.target.closest('.btn-mana');
-            if (btn) {
-                e.preventDefault();
-                const pid = parseInt(btn.dataset.pid);
-                const color = btn.dataset.color;
-                const s = state.find(p => p.id === pid);
-                s.mana[color] = Math.max(0, s.mana[color] - 1);
-                render(pid);
-                saveState();
+        let searchTimeout = null;
+        grid.addEventListener('input', e => {
+            if (e.target.classList.contains('search-input')) {
+                const query = e.target.value.trim();
+                const pid = parseInt(e.target.id.replace('search-input-', ''));
+                const resultsEl = document.getElementById(`search-results-${pid}`);
+                clearTimeout(searchTimeout);
+                if (query.length < 3) { resultsEl.innerHTML = ''; resultsEl.classList.remove('show'); return; }
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const resp = await fetch(`https://api.scryfall.com/cards/search?q=is:commander+${encodeURIComponent(query)}`);
+                        const data = await resp.json();
+                        if (data.data) {
+                            resultsEl.innerHTML = data.data.slice(0, 8).map(card => {
+                                const img = card.image_uris ? card.image_uris.art_crop : (card.card_faces ? card.card_faces[0].image_uris.art_crop : '');
+                                return `<div class="search-item" data-name="${card.name.replace(/"/g, '&quot;')}" data-img="${img}">${card.name}</div>`;
+                            }).join('');
+                            resultsEl.classList.add('show');
+                        }
+                    } catch (err) { console.error(err); }
+                }, 400);
             }
-        });
-
-        // Prevent keyboard from pushing layout on mobile
-        grid.addEventListener('focusin', e => {
             if (e.target.classList.contains('player-name')) {
-                e.target.select();
+                const pid = parseInt(e.target.closest('.player').dataset.player);
+                state.find(p => p.id === pid).name = e.target.value;
+                state.forEach(p => render(p.id)); saveState();
             }
         });
 
-        // ── Reset ────────────────────────────────────────────
+        // Double tap
+        let lastTap = 0;
+        grid.addEventListener('touchstart', e => {
+            // Ignore taps on buttons, inputs or search results
+            if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.search-container')) {
+                return;
+            }
+
+            const card = e.target.closest('.player');
+            if (!card) return;
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                const focusBtn = card.querySelector('.focus-btn');
+                if (focusBtn) focusBtn.click();
+            }
+            lastTap = now;
+        });
+
+        document.getElementById('toggle-log').addEventListener('click', () => document.getElementById('log-overlay').classList.add('show'));
+        document.getElementById('close-log').addEventListener('click', () => document.getElementById('log-overlay').classList.remove('show'));
+
         const overlay = document.getElementById('confirm-overlay');
-        const confirmYes = document.getElementById('confirm-yes');
-        const confirmNo = document.getElementById('confirm-no');
-
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            overlay.classList.add('show');
-        });
-
-        confirmNo.addEventListener('click', () => {
-            overlay.classList.remove('show');
-        });
-
-        overlay.addEventListener('click', e => {
-            if (e.target === overlay) overlay.classList.remove('show');
-        });
-
-        confirmYes.addEventListener('click', () => {
+        document.getElementById('reset-btn').addEventListener('click', () => overlay.classList.add('show'));
+        document.getElementById('confirm-no').addEventListener('click', () => overlay.classList.remove('show'));
+        document.getElementById('confirm-yes').addEventListener('click', () => {
             state.forEach((s, i) => {
-                s.life = STARTING_LIFE;
-                s.poison = 0;
-                s.commander = 0;
-                s.commanderTax = 0;
+                s.life = STARTING_LIFE; s.poison = 0; s.commanderTax = 0;
                 s.commanderDamage = { 1: 0, 2: 0, 3: 0, 4: 0 };
                 s.mana = { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
-                s.poisonLabel = '☠ Veneno';
-                s.theme = 'default';
-
-                // Reset UI inputs
-                const card = document.getElementById(`player-${s.id}`);
-                card.querySelector('.player-name').value = PLAYERS[i].name;
-                card.querySelector('.mini-label-input').value = '☠ Veneno';
+                s.theme = 'default'; s.commanderImage = null;
                 s.name = PLAYERS[i].name;
+                const card = document.getElementById(`player-${s.id}`);
+                card.querySelector('.player-name').value = s.name;
             });
-            logData = [];
-            localStorage.setItem('mtg_log', '[]');
-            saveState();
-            renderAll();
-            overlay.classList.remove('show');
+            logData = []; localStorage.setItem('mtg_log', '[]');
+            renderAll(); saveState(); overlay.classList.remove('show');
         });
 
-        // ── Draggable Mana Window ───────────────────────────
+        // Draggable
         let activeDrag = null;
         let startX, startY, initialX, initialY;
-
-        function startDragging(e) {
-            const header = e.target.closest('.mana-drop-header');
-            if (!header) return;
-
-            activeDrag = header.closest('.mana-dropdown');
-            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-            startX = clientX;
-            startY = clientY;
-
-            const style = window.getComputedStyle(activeDrag);
-            const matrix = new DOMMatrixReadOnly(style.transform);
-            initialX = matrix.m41;
-            initialY = matrix.m42;
-
-            activeDrag.style.transition = 'none';
-        }
-
-        function doDragging(e) {
+        document.addEventListener('mousedown', e => {
+            const h = e.target.closest('.mana-drop-header'); if (!h) return;
+            activeDrag = h.closest('.mana-dropdown');
+            startX = e.clientX; startY = e.clientY;
+            const m = new DOMMatrixReadOnly(window.getComputedStyle(activeDrag).transform);
+            initialX = m.m41; initialY = m.m42; activeDrag.style.transition = 'none';
+        });
+        document.addEventListener('mousemove', e => {
             if (!activeDrag) return;
-            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            activeDrag.style.transform = `translate(calc(-50% + ${initialX + (e.clientX - startX)}px), calc(-50% + ${initialY + (e.clientY - startY)}px))`;
+        });
+        document.addEventListener('mouseup', () => { if (activeDrag) activeDrag.style.transition = ''; activeDrag = null; });
 
-            const dx = clientX - startX;
-            const dy = clientY - startY;
-
-            activeDrag.style.transform = `translate(calc(-50% + ${initialX + dx}px), calc(-50% + ${initialY + dy}px))`;
-        }
-
-        function stopDragging() {
-            if (!activeDrag) return;
-            activeDrag.style.transition = '';
-            activeDrag = null;
-        }
-
-        document.addEventListener('mousedown', startDragging);
-        document.addEventListener('mousemove', doDragging);
-        document.addEventListener('mouseup', stopDragging);
-        document.addEventListener('touchstart', startDragging, { passive: false });
-        document.addEventListener('touchmove', (e) => {
-            if (activeDrag) {
-                e.preventDefault();
-                doDragging(e);
-            }
-        }, { passive: false });
-        document.addEventListener('touchend', stopDragging);
-
-        // ── Init ─────────────────────────────────────────────
         renderAll();
-
-        // Disable scroll/zoom on touch while using buttons
-        document.addEventListener('touchmove', e => {
-            if (e.target.closest('#grid')) e.preventDefault();
-        }, { passive: false });
     </script>
 </body>
 

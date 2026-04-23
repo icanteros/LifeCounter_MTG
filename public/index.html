@@ -40,7 +40,11 @@
             background: var(--bg-deep);
             font-family: 'Rajdhani', sans-serif;
             color: var(--text-primary);
-            overflow: hidden;
+        }
+
+        #game-screen {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* ── SCREENS ──────────────────────────────────────── */
@@ -271,6 +275,64 @@
             gap: 3px;
             padding: 3px;
             background: var(--bg-deep);
+            transition: all 0.3s ease;
+        }
+
+        /* ── FOCUS MODE ───────────────────────────────────── */
+        #grid.has-focus .player:not(.focused) {
+            display: none;
+        }
+
+        #grid.has-focus {
+            grid-template-columns: 1fr !important;
+            grid-template-rows: 1fr !important;
+            padding: 0;
+        }
+
+        .player.focused {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            border-radius: 0;
+            width: 100vw;
+            height: calc(100vh - 45px); /* Leave space for bottom bar */
+        }
+
+        .focus-btn {
+            position: absolute;
+            top: 8px;
+            right: 35px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .focus-btn:hover { opacity: 1; color: var(--gold); }
+        .player.focused .focus-btn { color: var(--gold); opacity: 1; }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            #grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                min-height: 100%; /* Allow content to define height if needed */
+            }
+            .player {
+                min-height: 25vh; /* Ensure each player has at least 1/4 screen height */
+            }
+            .life-display {
+                font-size: clamp(3rem, 12vh, 5.5rem);
+            }
+            .btn-main {
+                width: clamp(40px, 18vw, 70px);
+                height: clamp(40px, 8vh, 55px);
+            }
+            .player {
+                gap: 5px;
+                padding: 10px 5px 5px;
+            }
         }
 
         /* ── PLAYER CARD ──────────────────────────────────── */
@@ -281,11 +343,13 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background: var(--bg-card);
+            background-color: var(--bg-card);
             border-radius: 12px;
             overflow: hidden;
             padding: 14px 10px 10px;
-            transition: background 0.3s;
+            transition: background 0.3s, background-image 0.5s;
+            background-size: cover;
+            background-position: center;
         }
 
         .player::before {
@@ -293,7 +357,85 @@
             position: absolute; inset: 0;
             opacity: 0.07; pointer-events: none;
             background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px);
+            z-index: 1;
         }
+
+        .player.has-bg::before {
+            opacity: 0.6;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%);
+        }
+
+        .player-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* ── SEARCH UI ────────────────────────────────────── */
+        .search-container {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .search-input {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--gold-dark);
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: white;
+            font-size: 0.7rem;
+            width: 100%;
+            outline: none;
+        }
+
+        .search-results {
+            background: rgba(16,16,26,0.95);
+            border: 1px solid var(--gold-dark);
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .search-results.show { display: flex; }
+
+        .search-item {
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+            text-align: left;
+        }
+
+        .search-item:hover { background: rgba(201,168,76,0.2); }
+
+        .cmdr-btn {
+            position: absolute;
+            top: 8px;
+            left: 35px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0.4;
+        }
+        .cmdr-btn:hover { opacity: 1; color: var(--gold); }
 
         .player::after {
             position: absolute; top: 0; left: 0; right: 0;
@@ -391,6 +533,7 @@
             font-weight: 700; border: none; border-radius: 8px;
             transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
             user-select: none; -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         button:active { transform: scale(0.93); }
 
@@ -624,11 +767,6 @@
         }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        @media (orientation: landscape) and (min-width: 600px) {
-            .player[data-player="3"],
-            .player[data-player="4"] { transform: rotate(180deg); }
-        }
-
         @media (max-width: 400px) {
             .player { gap: 6px; padding: 8px 6px 6px; }
             #bottom-bar { padding: 4px 10px; }
@@ -695,7 +833,7 @@
         <div id="bottom-bar">
             <div style="display: flex; align-items: baseline; gap: 8px;">
                 <span id="title">⚔ MTG Life Counter</span>
-                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v2.0.0</span>
+                <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.2.0</span>
             </div>
             <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
             <button id="reset-btn">↺ Reiniciar</button>
@@ -859,80 +997,87 @@
 
     function createPlayerCard(player) {
         const el = document.createElement('div');
-        el.className = 'player';
+        el.className = 'player' + (player.commanderImage ? ' has-bg' : '');
         el.dataset.player = player.id;
         el.id = `player-${player.id}`;
+        if (player.commanderImage) {
+            el.style.backgroundImage = `url(${player.commanderImage})`;
+        }
         const isMe = (player.id === mySlot);
 
         el.innerHTML = `
-            <div class="theme-btn" data-pid="${player.id}">🎨</div>
+            <div class="theme-btn" data-pid="${player.id}" title="Cambiar Tema">🎨</div>
+            <div class="cmdr-btn" data-pid="${player.id}" title="Buscar Comandante">🎴</div>
+            <div class="focus-btn" data-pid="${player.id}" title="Enfocar Jugador">🔍</div>
             <span class="conn-badge ${player.connected ? 'online' : ''}" id="conn-${player.id}"></span>
             
-            <div class="player-name-wrap">
-                <input type="text" class="player-name" value="${escHtml(player.name)}" 
-                       ${isMe ? '' : 'disabled'} maxlength="16" />
-            </div>
+            <div class="player-content">
+                <div class="player-name-wrap">
+                    <input type="text" class="player-name" value="${escHtml(player.name)}" 
+                           ${isMe ? '' : 'disabled'} maxlength="24" />
+                </div>
 
-            <div class="life-display" id="life-${player.id}">
-                <span class="life-val">${player.life}</span>
-                <div class="delta" id="delta-${player.id}"></div>
-            </div>
+                <div class="life-display" id="life-${player.id}">
+                    <span class="life-val">${player.life}</span>
+                    <div class="delta" id="delta-${player.id}"></div>
+                </div>
 
-            <div class="btn-row">
-                <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${isMe ? '' : 'disabled'}>-5</button>
-                <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
-                <button class="btn-main" data-pid="${player.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
-                <button class="btn-fast" data-pid="${player.id}" data-delta="+5" ${isMe ? '' : 'disabled'}>+5</button>
-            </div>
+                <div class="btn-row">
+                    <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${isMe ? '' : 'disabled'}>-5</button>
+                    <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                    <button class="btn-main" data-pid="${player.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                    <button class="btn-fast" data-pid="${player.id}" data-delta="+5" ${isMe ? '' : 'disabled'}>+5</button>
+                </div>
 
-            <div class="mana-pool">
-                <button class="mana-selector-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>
-                    💎 MANA
-                </button>
-                <div class="mana-dropdown" id="mana-drop-${player.id}">
-                    <div class="mana-drop-header">
-                        <span class="cmdr-det-title">Reserva de Maná</span>
-                        <span class="mana-close" data-pid="${player.id}">&times;</span>
-                    </div>
-                    <div class="mana-grid">
-                        ${['w','u','b','r','g','c'].map(c => `
-                            <div class="mana-item">
-                                <div class="mana-symbol-wrap">
-                                    <div class="btn-mana ${c}" data-pid="${player.id}" data-color="${c}">${c.toUpperCase()}</div>
-                                    <span class="mana-val" id="mana-${player.id}-${c}">${player.mana ? player.mana[c] : 0}</span>
+                <div class="mana-pool">
+                    <button class="mana-selector-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>
+                        💎 MANA
+                    </button>
+                    <div class="mana-dropdown" id="mana-drop-${player.id}">
+                        <div class="mana-drop-header">
+                            <span class="cmdr-det-title">Reserva de Maná</span>
+                            <span class="mana-close" data-pid="${player.id}">&times;</span>
+                        </div>
+                        <div class="mana-grid">
+                            ${['w','u','b','r','g','c'].map(c => `
+                                <div class="mana-item">
+                                    <div class="mana-symbol-wrap">
+                                        <div class="btn-mana ${c}" data-pid="${player.id}" data-color="${c}">${c.toUpperCase()}</div>
+                                        <span class="mana-val" id="mana-${player.id}-${c}">${player.mana ? player.mana[c] : 0}</span>
+                                    </div>
+                                    <div class="mana-ctrls">
+                                        <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                                        <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                                    </div>
                                 </div>
-                                <div class="mana-ctrls">
-                                    <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
-                                    <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-
-            <div class="counters-row">
-                <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
-                    <input class="mini-label-input" id="label-poison-${player.id}" value="${player.poisonLabel || '☠ Veneno'}" 
-                           data-pid="${player.id}" data-type="poisonLabel" maxlength="15" ${isMe ? '' : 'disabled'} />
-                    <div class="mini-controls">
-                        <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
-                        <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
-                        <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
 
-                <div class="mini-counter" id="tax-wrap-${player.id}">
-                    <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
-                    <div class="mini-controls">
-                        <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
-                        <span class="mini-val" id="tax-${player.id}">${player.commanderTax || 0}</span>
-                        <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                <div class="counters-row">
+                    <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
+                        <input class="mini-label-input" id="label-poison-${player.id}" value="${player.poisonLabel || '☠ Veneno'}" 
+                               data-pid="${player.id}" data-type="poisonLabel" maxlength="15" ${isMe ? '' : 'disabled'} />
+                        <div class="mini-controls">
+                            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                            <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
+                            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mini-counter">
-                    <button class="cmdr-adv-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>⚔ Comandante</button>
+                    <div class="mini-counter" id="tax-wrap-${player.id}">
+                        <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
+                        <div class="mini-controls">
+                            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                            <span class="mini-val" id="tax-${player.id}">${player.commanderTax || 0}</span>
+                            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                        </div>
+                    </div>
+
+                    <div class="mini-counter">
+                        <button class="cmdr-adv-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>⚔ Comandante</button>
+                    </div>
                 </div>
             </div>
 
@@ -953,6 +1098,13 @@
                 <div class="death-text">HAS MUERTO</div>
                 <button class="revive-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>Reiniciar Jugador</button>
             </div>
+
+            ${isMe ? `
+            <div class="search-container" id="search-container-${player.id}" style="display:none;">
+                <input type="text" class="search-input" placeholder="Buscar comandante..." id="search-input-${player.id}">
+                <div class="search-results" id="search-results-${player.id}"></div>
+            </div>
+            ` : ''}
         `;
 
         return el;
@@ -987,6 +1139,27 @@
         card.classList.toggle('danger', p.life <= 5);
         card.classList.toggle('disconnected', !p.connected);
         if (connBadge) connBadge.classList.toggle('online', p.connected);
+
+        // Commander Background Sync
+        if (p.commanderImage) {
+            card.style.backgroundImage = `url("${p.commanderImage}")`;
+            card.classList.add('has-bg');
+        } else {
+            card.style.backgroundImage = '';
+            card.classList.remove('has-bg');
+        }
+
+        // Life and Delta
+
+        if (p.commanderImage) {
+            if (card.style.backgroundImage !== `url("${p.commanderImage}")`) {
+                card.style.backgroundImage = `url("${p.commanderImage}")`;
+                card.classList.add('has-bg');
+            }
+        } else {
+            card.style.backgroundImage = '';
+            card.classList.remove('has-bg');
+        }
 
         // Life and Delta
         const oldLife = prevLife[p.id];
@@ -1053,11 +1226,11 @@
     grid.addEventListener('click', e => {
         const btn = e.target.closest('button');
         const themeBtn = e.target.closest('.theme-btn');
+        const focusBtn = e.target.closest('.focus-btn');
         const closeBtn = e.target.closest('.cmdr-close');
         const manaClose = e.target.closest('.mana-close');
         
-        if (!btn && !themeBtn && !closeBtn && !manaClose) return;
-        if (btn && btn.disabled) return;
+        if (!btn && !themeBtn && !focusBtn && !closeBtn && !manaClose) return;
 
         // Commander detail close
         if (closeBtn || (btn && btn.classList.contains('cmdr-close'))) {
@@ -1073,8 +1246,39 @@
             return;
         }
 
-        if (!btn) return;
-        
+        // Focus toggle
+        if (focusBtn) {
+            const pid = parseInt(focusBtn.dataset.pid);
+            const card = document.getElementById(`player-${pid}`);
+            const isFocused = card.classList.contains('focused');
+            
+            document.querySelectorAll('.player').forEach(p => p.classList.remove('focused'));
+            grid.classList.remove('has-focus');
+
+            if (!isFocused) {
+                card.classList.add('focused');
+                grid.classList.add('has-focus');
+                focusBtn.textContent = '❌';
+            } else {
+                focusBtn.textContent = '🔍';
+            }
+            return;
+        }
+
+        // Theme picker (must be before btn.disabled check since themeBtn is not a button)
+        if (themeBtn) {
+            const pid = parseInt(themeBtn.dataset.pid);
+            const card = document.getElementById(`player-${pid}`);
+            const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
+            const current = card.dataset.theme || 'default';
+            const next = themes[(themes.indexOf(current) + 1) % themes.length];
+            socket.emit('counter_change', { pid, type: 'theme', label: next });
+            return;
+        }
+
+        // Skip disabled buttons
+        if (btn && btn.disabled) return;
+
         const pid = parseInt(btn.dataset.pid);
         const type = btn.dataset.type;
         const delta = parseInt(btn.dataset.delta);
@@ -1092,17 +1296,6 @@
         // Commander detail toggle
         if (btn.classList.contains('cmdr-adv-btn')) {
             document.getElementById(`cmdr-det-${pid}`).classList.add('show');
-            return;
-        }
-
-        // Theme picker
-        if (themeBtn) {
-            const pid = parseInt(themeBtn.dataset.pid);
-            const card = document.getElementById(`player-${pid}`);
-            const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
-            const current = card.dataset.theme || 'default';
-            const next = themes[(themes.indexOf(current) + 1) % themes.length];
-            socket.emit('counter_change', { pid, type: 'theme', label: next });
             return;
         }
 
@@ -1173,6 +1366,28 @@
     });
 
     // ─────────────────────────────────────────────
+    // Double tap for Focus
+    // ─────────────────────────────────────────────
+    let lastTap = 0;
+    grid.addEventListener('touchstart', e => {
+        // Ignore taps on buttons, inputs or search results
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.search-container')) {
+            return;
+        }
+
+        const card = e.target.closest('.player');
+        if (!card) return;
+        const now = Date.now();
+        const TIMESPAN = 300;
+        if (now - lastTap < TIMESPAN) {
+            const pid = parseInt(card.dataset.player);
+            const focusBtn = card.querySelector('.focus-btn');
+            if (focusBtn) focusBtn.click();
+        }
+        lastTap = now;
+    });
+
+    // ─────────────────────────────────────────────
     // DRAGGABLE MANA WINDOW
     // ─────────────────────────────────────────────
     let activeDrag = null;
@@ -1224,14 +1439,83 @@
             doDragging(e);
         }
     }, { passive: false });
+    // ─────────────────────────────────────────────
+    // COMMANDER SEARCH (Scryfall)
+    // ─────────────────────────────────────────────
+    let searchTimeout = null;
+
+    grid.addEventListener('click', e => {
+        const cmdrBtn = e.target.closest('.cmdr-btn');
+        if (cmdrBtn) {
+            const pid = parseInt(cmdrBtn.dataset.pid);
+            if (pid !== mySlot) return;
+            const container = document.getElementById(`search-container-${pid}`);
+            const isVisible = container.style.display !== 'none';
+            container.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) document.getElementById(`search-input-${pid}`).focus();
+        }
+
+        const searchItem = e.target.closest('.search-item');
+        if (searchItem) {
+            const pid = mySlot;
+            const name = searchItem.dataset.name;
+            const img = searchItem.dataset.img;
+            
+            // Update local state and sync
+            socket.emit('name_change', { pid, name });
+            socket.emit('counter_change', { pid, type: 'commanderImage', label: img });
+            
+            // Hide search
+            document.getElementById(`search-container-${pid}`).style.display = 'none';
+        }
+    });
+
+    grid.addEventListener('input', e => {
+        if (e.target.classList.contains('search-input')) {
+            const query = e.target.value.trim();
+            const pid = mySlot;
+            const resultsEl = document.getElementById(`search-results-${pid}`);
+
+            clearTimeout(searchTimeout);
+            if (query.length < 3) {
+                resultsEl.innerHTML = '';
+                resultsEl.classList.remove('show');
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const resp = await fetch(`https://api.scryfall.com/cards/search?q=is:commander+${encodeURIComponent(query)}`);
+                    const data = await resp.json();
+                    
+                    if (data.data && data.data.length > 0) {
+                        resultsEl.innerHTML = data.data.slice(0, 8).map(card => {
+                            const img = card.image_uris ? card.image_uris.art_crop : 
+                                       (card.card_faces ? card.card_faces[0].image_uris.art_crop : '');
+                            return `
+                                <div class="search-item" data-name="${escHtml(card.name)}" data-img="${img}">
+                                    ${escHtml(card.name)}
+                                </div>
+                            `;
+                        }).join('');
+                        resultsEl.classList.add('show');
+                    } else {
+                        resultsEl.innerHTML = '<div class="search-item">No se encontraron comandantes</div>';
+                        resultsEl.classList.add('show');
+                    }
+                } catch (err) {
+                    console.error('Scryfall error:', err);
+                }
+            }, 400);
+        }
+    });
+
     document.addEventListener('touchend', stopDragging);
 
     // ─────────────────────────────────────────────
     // TOUCH: prevent scroll/zoom on grid
     // ─────────────────────────────────────────────
-    document.addEventListener('touchmove', e => {
-        if (e.target.closest('#grid')) e.preventDefault();
-    }, { passive: false });
+    // REMOVED: document.addEventListener('touchmove', e => { ...
 </script>
 
 </body>
