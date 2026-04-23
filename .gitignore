@@ -1,10 +1,10 @@
-# Dependencias
+# Dependencies
 node_modules/
-jspm_packages/
+/jspm_packages/
 .pnp/
 .pnp.js
 
-# Variables de entorno y Secretos
+# Environment variables and Secrets
 .env
 .env.local
 .env.*.local
@@ -19,15 +19,16 @@ secrets.*
 *.pem
 *.cert
 
-# IDEs y Editores
+# IDEs and Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *.sublime-project
 *.sublime-workspace
+.history/
 
-# Logs y Debugging
+# Logs and Debugging
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -35,8 +36,9 @@ pnpm-debug.log*
 *.log
 logs/
 *.lcov
+.eslintcache
 
-# Sistema operativo
+# OS Files
 .DS_Store
 .DS_Store?
 ._*
@@ -51,8 +53,9 @@ playwright/.cache/
 test_results.*
 coverage/
 .nyc_output
+.results/
 
-# Build y Cache
+# Build and Cache
 dist/
 build/
 .cache/
@@ -62,10 +65,17 @@ build/
 .nuxt/
 .parcel-cache/
 .turbo/
+out/
 
-# Despliegue y Plataformas
+# Deployment and Platforms
 .vercel/
 .netlify/
 .serverpress/
 .railway/
 render.yaml.bak
+
+# Node specifics
+.npm
+.eslintcache
+.stylelintcache
+.node_repl_history

@@ -44,18 +44,22 @@ class RoomManager {
 
   /**
    * Crea una nueva sala
+   * @param {string} mode - Modo de sala ('individual' o 'group')
+   * @param {string} leaderSocketId - ID del socket del creador
    * @returns {{ code: string, room: Room }}
    */
-  createRoom() {
+  createRoom(mode = 'individual', leaderSocketId = null) {
     const code = this.generateRoomCode();
     const room = {
       players: createPlayersArray(),
       sockets: new Set(),
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      mode: mode, // 'individual' o 'group'
+      leaderSocketId: leaderSocketId
     };
     
     this.rooms.set(code, room);
-    logger.info({ code, players: this.config.MAX_PLAYERS }, 'Sala creada');
+    logger.info({ code, mode, leader: leaderSocketId }, 'Sala creada');
     
     return { code, room };
   }

@@ -20,14 +20,15 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
     logger.info({ socketId: socket.id }, 'Cliente conectado');
 
     // ── CREATE ROOM ──────────────────────────────────────────
-    socket.on('create_room', () => {
+    socket.on('create_room', ({ mode } = {}) => {
       if (!rateLimiter.checkRoomCreate(socket.id, config.RATE_LIMIT_CREATE_ROOM, 60000)) {
         socket.emit('error', { message: 'Demasiados intentos. Esperá unos segundos.' });
         return;
       }
 
-      const { code, room } = roomManager.createRoom();
-      socket.emit('room_created', { code });
+      const roomMode = mode === 'group' ? 'group' : 'individual';
+      const { code, room } = roomManager.createRoom(roomMode, socket.id);
+      socket.emit('room_created', { code, mode: roomMode });
     });
 
     // ── CHECK ROOM ──────────────────────────────────────────
@@ -88,7 +89,9 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
       socket.emit('joined_room', {
         code,
         players: room.players,
-        mySlot: slotValidation.slot
+        mySlot: slotValidation.slot,
+        mode: room.mode,
+        isLeader: room.leaderSocketId === socket.id
       });
 
       io.to(code).emit('game_state', { players: room.players });
@@ -97,7 +100,7 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
 
     // ── LIFE CHANGE ──────────────────────────────────────────
     socket.on('life_change', ({ pid, delta }) => {
-      if (!canPlayerModify(socket, pid)) {
+      if (!canPlayerModify(socket, pid, roomManager)) {
         logger.warn({ socketId: socket.id, pid }, 'Intento no autorizado de life_change');
         return;
       }
@@ -124,7 +127,7 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
 
     // ── COUNTER CHANGE ──────────────────────────────────────────
     socket.on('counter_change', ({ pid, type, delta, color, target, label }) => {
-      if (!canPlayerModify(socket, pid)) {
+      if (!canPlayerModify(socket, pid, roomManager)) {
         logger.warn({ socketId: socket.id, pid }, 'Intento no autorizado de counter_change');
         return;
       }
@@ -145,7 +148,7 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
 
     // ── NAME CHANGE ──────────────────────────────────────────
     socket.on('name_change', ({ pid, name }) => {
-      if (!canPlayerModify(socket, pid)) {
+      if (!canPlayerModify(socket, pid, roomManager)) {
         logger.warn({ socketId: socket.id, pid }, 'Intento no autorizado de name_change');
         return;
       }
@@ -163,7 +166,7 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
 
     // ── REVIVE PLAYER ──────────────────────────────────────────
     socket.on('revive_player', ({ pid }) => {
-      if (!canPlayerModify(socket, pid)) {
+      if (!canPlayerModify(socket, pid, roomManager)) {
         logger.warn({ socketId: socket.id, pid }, 'Intento no autorizado de revive_player');
         return;
       }
@@ -239,7 +242,16 @@ function applyCounterChange(player, { type, delta, color, target, label }) {
       break;
     case 'cmdrDmg':
       if (target && player.commanderDamage.hasOwnProperty(target) && !isNaN(deltaNum)) {
-        player.commanderDamage[target] = Math.max(0, Math.min(21, player.commanderDamage[target] + deltaNum));
+        const oldVal = player.commanderDamage[target];
+        const newVal = Math.max(0, Math.min(21, oldVal + deltaNum));
+        const actualDelta = newVal - oldVal;
+        
+        player.commanderDamage[target] = newVal;
+        
+        // El daño de comandante se resta de la vida general (Magic rules)
+        if (actualDelta !== 0) {
+          player.life = Math.max(config.MIN_LIFE, Math.min(config.MAX_LIFE, player.life - actualDelta));
+        }
       }
       break;
     case 'tax':

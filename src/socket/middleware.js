@@ -24,10 +24,22 @@ const { validateInput } = require('../utils/sanitizer');
  * Verifica si un socket puede modificar un jugador
  * @param {SocketWithData} socket - Socket con datos
  * @param {number} targetPid - ID del jugador objetivo
+ * @param {RoomManager} roomManager - Gestor de salas
  * @returns {boolean} True si está autorizado
  */
-function canPlayerModify(socket, targetPid) {
-  return socket.data.playerSlot === targetPid;
+function canPlayerModify(socket, targetPid, roomManager) {
+  // Siempre puede modificar su propio slot
+  if (socket.data.playerSlot === targetPid) return true;
+
+  // Si no es su propio slot, verificamos si es el líder en modo grupo
+  if (roomManager && socket.data.roomCode) {
+    const room = roomManager.getRoom(socket.data.roomCode);
+    if (room && room.mode === 'group' && room.leaderSocketId === socket.id) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**

@@ -317,22 +317,97 @@
             #grid {
                 grid-template-columns: 1fr;
                 grid-template-rows: repeat(4, 1fr);
-                min-height: 100%; /* Allow content to define height if needed */
+                min-height: 100%;
+                gap: 5px;
+                padding: 5px;
             }
             .player {
-                min-height: 25vh; /* Ensure each player has at least 1/4 screen height */
+                min-height: 24vh;
+                padding: 8px 5px;
+                gap: 5px;
             }
             .life-display {
-                font-size: clamp(3rem, 12vh, 5.5rem);
+                font-size: clamp(3.2rem, 15vh, 6rem);
             }
             .btn-main {
-                width: clamp(40px, 18vw, 70px);
-                height: clamp(40px, 8vh, 55px);
+                width: clamp(45px, 20vw, 85px);
+                height: clamp(45px, 8vh, 65px);
+                font-size: 2.2rem;
             }
-            .player {
-                gap: 5px;
-                padding: 10px 5px 5px;
+            .btn-fast {
+                padding: 8px 15px;
+                font-size: 1rem;
             }
+            .player-name {
+                font-size: 1.1rem;
+                width: 85%;
+            }
+            .mini-val {
+                font-size: 1.2rem;
+            }
+            .mini-label, .mini-label-input {
+                font-size: 0.75rem;
+            }
+            .cmdr-adv-btn {
+                font-size: 0.8rem;
+                padding: 5px 12px;
+            }
+            .mana-selector-btn {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+            #bottom-bar {
+                padding: 8px 12px;
+                height: 55px;
+            }
+            #log-overlay {
+                bottom: 55px;
+                width: 100%;
+            }
+        }
+
+        /* ── MODE SELECTOR ────────────────────────────────── */
+        .mode-selector {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mode-option {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-family: 'Rajdhani';
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+        }
+
+        .mode-option.active {
+            background: rgba(201, 168, 76, 0.15);
+            color: var(--gold);
+            border-color: var(--gold-dark);
+        }
+
+        .mode-option:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+
+        .mode-description {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            font-style: italic;
+            margin-top: -8px;
         }
 
         /* ── PLAYER CARD ──────────────────────────────────── */
@@ -677,12 +752,138 @@
             color: rgba(255,255,255,0.4); padding: 5px 15px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; text-transform: uppercase;
         }
 
+        /* ── LOG PANEL ────────────────────────────────── */
+        #log-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 45px; /* Leave space for bottom bar */
+            width: 300px;
+            background: rgba(12, 12, 20, 0.95);
+            border-left: 1px solid rgba(201, 168, 76, 0.2);
+            z-index: 200;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        #log-overlay.show {
+            transform: translateX(0);
+        }
+
+        .log-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-clear-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .log-clear-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border-color: var(--gold-dark);
+        }
+
+        .log-legend {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.65rem;
+        }
+
+        .log-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+        }
+
+        .log-legend-color {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+
+        #log-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+        }
+
+        .log-entry {
+            padding: 6px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--gold-dark);
+            font-size: 0.7rem;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-damage { border-left-color: #ff4444; }
+        .log-gain { border-left-color: #4dff91; }
+        .log-poison { border-left-color: #9b59b6; }
+        .log-commander { border-left-color: #e74c3c; }
+        .log-commander-death { border-left-color: #c0392b; }
+        .log-tax { border-left-color: #f39c12; }
+        .log-mana { border-left-color: #3498db; }
+        .log-death { border-left-color: #8b0000; background: rgba(139, 0, 0, 0.15); }
+        .log-reset { border-left-color: #00bcd4; }
+        .log-player { border-left-color: #95a5a6; }
+
+        .log-time {
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            margin-right: 5px;
+        }
+
         /* ── BOTTOM BAR ─────────────────────────────────────── */
         #bottom-bar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 6px 16px; background: #0c0c14;
-            border-top: 1px solid rgba(201,168,76,0.15);
-            gap: 10px; flex-shrink: 0;
+            border-top: 1px solid rgba(201, 168, 76, 0.15);
+            gap: 15px; flex-shrink: 0;
+            position: relative;
+            z-index: 210; /* Above log overlay */
+        }
+
+        #title-container {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            min-width: 0;
+            flex: 1;
         }
 
         #title {
@@ -691,6 +892,8 @@
             color: var(--gold); letter-spacing: 0.15em;
             text-transform: uppercase; text-shadow: 0 0 12px var(--gold-dark);
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #room-code-badge {
@@ -701,10 +904,14 @@
             cursor: pointer;
             transition: color 0.2s;
             white-space: nowrap;
+            background: rgba(201, 168, 76, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(201, 168, 76, 0.2);
         }
 
-        #room-code-badge:hover { color: var(--gold); }
-        #room-code-badge span { color: var(--gold); }
+        #room-code-badge:hover { color: var(--gold); border-color: var(--gold); }
+        #room-code-badge span { color: var(--gold); font-weight: 700; }
 
         #reset-btn {
             padding: 8px 18px;
@@ -713,9 +920,29 @@
             letter-spacing: 0.1em; text-transform: uppercase;
             background: linear-gradient(135deg, #1a0d00, #2c1800);
             color: var(--gold); border: 1px solid var(--gold-dark);
-            border-radius: 8px; box-shadow: 0 0 10px rgba(201,168,76,0.2);
+            border-radius: 8px; box-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
             transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
         }
+
+        #toggle-log-btn {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold-dark);
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #toggle-log-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+            box-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
+        }
+
         #reset-btn:hover { background: linear-gradient(135deg, #2c1800, #4a2c00); box-shadow: 0 0 20px rgba(201,168,76,0.45); }
         #reset-btn:active { transform: scale(0.95); }
 
@@ -788,6 +1015,15 @@
         <!-- CREATE ROOM -->
         <div id="create-section" class="lobby-section">
             <div class="lobby-section-title">Nueva sala</div>
+            
+            <div class="mode-selector" id="lobby-mode-selector">
+                <div class="mode-option active" data-mode="individual">Individual</div>
+                <div class="mode-option" data-mode="group">Líder de Grupo</div>
+            </div>
+            <div class="mode-description" id="mode-desc">
+                Solo podrás manejar tu propio contador.
+            </div>
+
             <button class="lobby-btn lobby-btn-primary" id="create-btn">Crear sala</button>
         </div>
 
@@ -800,7 +1036,7 @@
                    maxlength="5" placeholder="Código de sala" autocomplete="off" spellcheck="false" />
         </div>
 
-        <!-- SLOT PICKER (shown after code entered or room created) -->
+        <!-- SLOT PICKER -->
         <div class="lobby-section" id="slot-section" style="display:none;">
             <div class="lobby-section-title">Elegí tu lugar</div>
             <div class="slot-grid" id="slot-grid">
@@ -809,12 +1045,14 @@
                 <button class="slot-btn" data-slot="3"><span class="slot-dot"></span>Jugador 3</button>
                 <button class="slot-btn" data-slot="4"><span class="slot-dot"></span>Jugador 4</button>
             </div>
+            <button class="lobby-btn lobby-btn-secondary" id="slot-back-btn" style="margin-top: 8px;">← Volver</button>
         </div>
 
-        <!-- ROOM CODE DISPLAY (after creation) -->
+        <!-- ROOM CODE DISPLAY -->
         <div id="room-code-section" class="room-code-display" style="display:none;">
             <span class="room-code-label">Código de sala — compartilo con tus amigos</span>
             <span class="room-code-value" id="lobby-code-value">—</span>
+            <button class="lobby-btn lobby-btn-secondary" id="create-back-btn" style="margin-top: 12px; font-size: 0.7rem; padding: 8px;">← Volver al inicio</button>
         </div>
 
         <div class="lobby-error" id="lobby-error"></div>
@@ -831,13 +1069,39 @@
     <div id="app">
         <div id="grid"><!-- Players generated by JS --></div>
         <div id="bottom-bar">
-            <div style="display: flex; align-items: baseline; gap: 8px;">
+            <div id="title-container">
                 <span id="title">⚔ MTG Life Counter</span>
                 <span style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.2.0</span>
             </div>
+            
             <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
-            <button id="reset-btn">↺ Reiniciar</button>
+            
+            <div style="display: flex; gap: 8px;">
+                <button id="toggle-log-btn">📜 LOG</button>
+                <button id="leave-game-btn" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:var(--text-muted);">🚪</button>
+                <button id="reset-btn">↺ Reiniciar</button>
+            </div>
         </div>
+    </div>
+
+    <!-- Log Overlay -->
+    <div id="log-overlay">
+        <div class="log-header">
+            <span style="font-family:'Cinzel'; color:var(--gold);">📜 Historial</span>
+            <div class="log-actions">
+                <button id="clear-log" class="log-clear-btn">🗑 Limpiar</button>
+                <span id="close-log" style="cursor:pointer; font-size:1.2rem;">&times;</span>
+            </div>
+        </div>
+        <div class="log-legend">
+            <div class="log-legend-item"><span class="log-legend-color" style="background:#ff4444;"></span>Daño</div>
+            <div class="log-legend-item"><span class="log-legend-color" style="background:#4dff91;"></span>Vida</div>
+            <div class="log-legend-item"><span class="log-legend-color" style="background:#9b59b6;"></span>Veneno</div>
+            <div class="log-legend-item"><span class="log-legend-color" style="background:#e74c3c;"></span>Cmdr</div>
+            <div class="log-legend-item"><span class="log-legend-color" style="background:#f39c12;"></span>Tax</div>
+            <div class="log-legend-item"><span class="log-legend-color" style="background:#3498db;"></span>Maná</div>
+        </div>
+        <div id="log-list"></div>
     </div>
 
     <div id="confirm-overlay">
@@ -852,26 +1116,20 @@
     </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
-<!-- Socket.io client (served by the server) -->
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-    // ─────────────────────────────────────────────
-    // SOCKET
-    // ─────────────────────────────────────────────
     const socket = io();
 
     let myRoomCode = null;
     let mySlot = null;
     let pendingCode = null;
     let pendingSlot = null;
+    let isLeader = false;
+    let roomMode = 'individual';
 
-    // ─────────────────────────────────────────────
-    // SCREEN HELPERS
-    // ─────────────────────────────────────────────
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -888,22 +1146,60 @@
     // ─────────────────────────────────────────────
     // LOBBY LOGIC
     // ─────────────────────────────────────────────
-    const createBtn     = document.getElementById('create-btn');
-    const joinBtn       = document.getElementById('join-btn');
-    const codeInput     = document.getElementById('code-input');
-    const slotSection   = document.getElementById('slot-section');
-    const slotGrid      = document.getElementById('slot-grid');
-    const lobbyError    = document.getElementById('lobby-error');
+    const createBtn       = document.getElementById('create-btn');
+    const joinBtn         = document.getElementById('join-btn');
+    const codeInput       = document.getElementById('code-input');
+    const slotSection     = document.getElementById('slot-section');
+    const slotGrid        = document.getElementById('slot-grid');
+    const lobbyError      = document.getElementById('lobby-error');
     const roomCodeSection = document.getElementById('room-code-section');
     const lobbyCodeValue  = document.getElementById('lobby-code-value');
+    const modeSelector    = document.getElementById('lobby-mode-selector');
+    const modeDesc        = document.getElementById('mode-desc');
+
+    const slotBackBtn     = document.getElementById('slot-back-btn');
+    const createBackBtn   = document.getElementById('create-back-btn');
+    const leaveGameBtn    = document.getElementById('leave-game-btn');
 
     let selectedSlot = null;
-    let isCreating = false;
+    let selectedMode = 'individual';
 
-    function setLobbyError(msg) { lobbyError.textContent = msg; }
-    function clearLobbyError()  { lobbyError.textContent = ''; }
+    function resetLobby() {
+        slotSection.style.display = 'none';
+        roomCodeSection.style.display = 'none';
+        joinBtn.style.display = 'none';
+        createBtn.style.display = '';
+        codeInput.style.display = '';
+        modeSelector.style.display = '';
+        modeDesc.style.display = '';
+        document.querySelector('#create-section .lobby-section-title').style.display = '';
+        codeInput.value = '';
+        lobbyCodeValue.textContent = '—';
+        lobbyError.textContent = '';
+        pendingCode = null;
+        pendingSlot = null;
+    }
 
-    // Show slot picker
+    if (slotBackBtn) slotBackBtn.addEventListener('click', resetLobby);
+    if (createBackBtn) createBackBtn.addEventListener('click', resetLobby);
+    if (leaveGameBtn) leaveGameBtn.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres salir de la partida?')) {
+            socket.emit('leave_room');
+            resetLobby();
+            showScreen('lobby-screen');
+        }
+    });
+
+    modeSelector.addEventListener('click', e => {
+        const opt = e.target.closest('.mode-option');
+        if (!opt) return;
+        document.querySelectorAll('.mode-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        selectedMode = opt.dataset.mode;
+        modeDesc.textContent = (selectedMode === 'group') ? 
+            "Podrás manejar todos los contadores de la sala." : "Solo podrás manejar tu propio contador.";
+    });
+
     function showSlotPicker(connectedSlots = []) {
         slotSection.style.display = '';
         joinBtn.style.display = '';
@@ -916,25 +1212,27 @@
     }
 
     createBtn.addEventListener('click', () => {
-        clearLobbyError();
-        isCreating = true;
-        socket.emit('create_room');
+        lobbyError.textContent = '';
+        socket.emit('create_room', { mode: selectedMode });
     });
 
-    socket.on('room_created', ({ code }) => {
+    socket.on('room_created', ({ code, mode }) => {
         myRoomCode = code;
         pendingCode = code;
+        roomMode = mode;
         lobbyCodeValue.textContent = code;
         roomCodeSection.style.display = '';
         showSlotPicker([]);
         createBtn.style.display = 'none';
         codeInput.style.display = 'none';
+        modeSelector.style.display = 'none';
+        modeDesc.style.display = 'none';
         document.querySelector('#create-section .lobby-section-title').style.display = 'none';
     });
 
     codeInput.addEventListener('input', () => {
         codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        clearLobbyError();
+        lobbyError.textContent = '';
         const code = codeInput.value.trim();
         if (code.length === 5) {
             pendingCode = code;
@@ -954,39 +1252,35 @@
         pendingSlot = selectedSlot;
         document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        clearLobbyError();
+        lobbyError.textContent = '';
     });
 
     joinBtn.addEventListener('click', () => {
-        if (!pendingCode) { setLobbyError('Ingresá un código de sala.'); return; }
-        if (!pendingSlot) { setLobbyError('Elegí tu lugar de jugador.'); return; }
-        clearLobbyError();
+        if (!pendingCode) { lobbyError.textContent = 'Ingresá un código de sala.'; return; }
+        if (!pendingSlot) { lobbyError.textContent = 'Elegí tu lugar de jugador.'; return; }
         socket.emit('join_room', { code: pendingCode, playerSlot: pendingSlot });
     });
 
-    // ─────────────────────────────────────────────
-    // GAME: JOIN
-    // ─────────────────────────────────────────────
-    socket.on('joined_room', ({ code, players, mySlot: slot }) => {
+    socket.on('joined_room', ({ code, players, mySlot: slot, mode, isLeader: leaderStatus }) => {
         myRoomCode = code;
         mySlot = slot;
+        roomMode = mode;
+        isLeader = leaderStatus;
         document.getElementById('game-code-display').textContent = code;
         buildGrid(players);
         showScreen('game-screen');
     });
 
     socket.on('room_info', ({ code, taken }) => {
-        if (pendingCode === code) {
-            showSlotPicker(taken);
-        }
+        if (pendingCode === code) showSlotPicker(taken);
     });
 
     socket.on('error', ({ message }) => {
-        setLobbyError(message);
+        lobbyError.textContent = message;
     });
 
     // ─────────────────────────────────────────────
-    // GAME GRID
+    // GAME GRID & PLAYERS
     // ─────────────────────────────────────────────
     const grid = document.getElementById('grid');
 
@@ -1000,39 +1294,32 @@
         el.className = 'player' + (player.commanderImage ? ' has-bg' : '');
         el.dataset.player = player.id;
         el.id = `player-${player.id}`;
-        if (player.commanderImage) {
-            el.style.backgroundImage = `url(${player.commanderImage})`;
-        }
-        const isMe = (player.id === mySlot);
+        if (player.commanderImage) el.style.backgroundImage = `url(${player.commanderImage})`;
+        
+        const canEdit = (player.id === mySlot) || (isLeader && roomMode === 'group');
+        const disableAttr = canEdit ? '' : 'disabled';
 
         el.innerHTML = `
             <div class="theme-btn" data-pid="${player.id}" title="Cambiar Tema">🎨</div>
             <div class="cmdr-btn" data-pid="${player.id}" title="Buscar Comandante">🎴</div>
             <div class="focus-btn" data-pid="${player.id}" title="Enfocar Jugador">🔍</div>
             <span class="conn-badge ${player.connected ? 'online' : ''}" id="conn-${player.id}"></span>
-            
             <div class="player-content">
                 <div class="player-name-wrap">
-                    <input type="text" class="player-name" value="${escHtml(player.name)}" 
-                           ${isMe ? '' : 'disabled'} maxlength="24" />
+                    <input type="text" class="player-name" value="${escHtml(player.name)}" ${disableAttr} maxlength="24" />
                 </div>
-
                 <div class="life-display" id="life-${player.id}">
                     <span class="life-val">${player.life}</span>
                     <div class="delta" id="delta-${player.id}"></div>
                 </div>
-
                 <div class="btn-row">
-                    <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${isMe ? '' : 'disabled'}>-5</button>
-                    <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
-                    <button class="btn-main" data-pid="${player.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
-                    <button class="btn-fast" data-pid="${player.id}" data-delta="+5" ${isMe ? '' : 'disabled'}>+5</button>
+                    <button class="btn-fast" data-pid="${player.id}" data-delta="-5" ${disableAttr}>-5</button>
+                    <button class="btn-main" data-pid="${player.id}" data-delta="-1" ${disableAttr}>-</button>
+                    <button class="btn-main" data-pid="${player.id}" data-delta="+1" ${disableAttr}>+</button>
+                    <button class="btn-fast" data-pid="${player.id}" data-delta="+5" ${disableAttr}>+5</button>
                 </div>
-
                 <div class="mana-pool">
-                    <button class="mana-selector-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>
-                        💎 MANA
-                    </button>
+                    <button class="mana-selector-btn" data-pid="${player.id}" ${disableAttr}>💎 MANA</button>
                     <div class="mana-dropdown" id="mana-drop-${player.id}">
                         <div class="mana-drop-header">
                             <span class="cmdr-det-title">Reserva de Maná</span>
@@ -1046,67 +1333,53 @@
                                         <span class="mana-val" id="mana-${player.id}-${c}">${player.mana ? player.mana[c] : 0}</span>
                                     </div>
                                     <div class="mana-ctrls">
-                                        <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
-                                        <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                                        <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="-1" ${disableAttr}>-</button>
+                                        <button class="btn-mini" data-pid="${player.id}" data-type="mana" data-color="${c}" data-delta="+1" ${disableAttr}>+</button>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 </div>
-
                 <div class="counters-row">
                     <div class="mini-counter" id="poison-wrap-${player.id}" style="display:none;">
                         <input class="mini-label-input" id="label-poison-${player.id}" value="${player.poisonLabel || '☠ Veneno'}" 
-                               data-pid="${player.id}" data-type="poisonLabel" maxlength="15" ${isMe ? '' : 'disabled'} />
+                               data-pid="${player.id}" data-type="poisonLabel" maxlength="15" ${disableAttr} />
                         <div class="mini-controls">
-                            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="-1" ${disableAttr}>−</button>
                             <span class="mini-val" id="poison-${player.id}">${player.poison}</span>
-                            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                            <button class="btn-mini" data-pid="${player.id}" data-type="poison" data-delta="+1" ${disableAttr}>+</button>
                         </div>
                     </div>
-
                     <div class="mini-counter" id="tax-wrap-${player.id}">
                         <span class="mini-label" style="font-size: clamp(0.45rem,1.5vw,0.6rem); text-transform: uppercase; color: var(--gold);">💀 Cmdr Tax</span>
                         <div class="mini-controls">
-                            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1" ${isMe ? '' : 'disabled'}>−</button>
+                            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="-1" ${disableAttr}>−</button>
                             <span class="mini-val" id="tax-${player.id}">${player.commanderTax || 0}</span>
-                            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                            <button class="btn-mini" data-pid="${player.id}" data-type="tax" data-delta="+1" ${disableAttr}>+</button>
                         </div>
                     </div>
-
                     <div class="mini-counter">
-                        <button class="cmdr-adv-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>⚔ Comandante</button>
+                        <button class="cmdr-adv-btn" data-pid="${player.id}" ${disableAttr}>⚔ Comandante</button>
                     </div>
                 </div>
             </div>
-
-            <!-- Advanced Commander UI -->
             <div class="cmdr-details" id="cmdr-det-${player.id}">
-                <div class="cmdr-det-header">
-                    <span class="cmdr-det-title">Stats de Comandante</span>
-                    <span class="cmdr-close">&times;</span>
-                </div>
-
+                <div class="cmdr-det-header"><span class="cmdr-det-title">Stats de Comandante</span><span class="cmdr-close">&times;</span></div>
                 <div class="cmdr-det-title" style="font-size:0.6rem; margin-top:5px;">Daño Recibido De</div>
-                <div class="cmdr-matrix" id="cmdr-matrix-${player.id}">
-                    <!-- Rellenado dinámicamente -->
-                </div>
+                <div class="cmdr-matrix" id="cmdr-matrix-${player.id}"></div>
             </div>
-
             <div class="death-overlay" id="death-${player.id}">
                 <div class="death-text">HAS MUERTO</div>
-                <button class="revive-btn" data-pid="${player.id}" ${isMe ? '' : 'disabled'}>Reiniciar Jugador</button>
+                <button class="revive-btn" data-pid="${player.id}" ${disableAttr}>Reiniciar Jugador</button>
             </div>
-
-            ${isMe ? `
+            ${canEdit ? `
             <div class="search-container" id="search-container-${player.id}" style="display:none;">
-                <input type="text" class="search-input" placeholder="Buscar comandante..." id="search-input-${player.id}">
+                <input type="text" class="search-input" data-pid="${player.id}" placeholder="Buscar comandante..." id="search-input-${player.id}">
                 <div class="search-results" id="search-results-${player.id}"></div>
             </div>
             ` : ''}
         `;
-
         return el;
     }
 
@@ -1115,41 +1388,25 @@
     }
 
     // ─────────────────────────────────────────────
-    // GAME STATE UPDATE (from server)
+    // STATE UPDATE
     // ─────────────────────────────────────────────
     const prevLife = {};
-    const ALL_PLAYERS = [1, 2, 3, 4];
+    let ALL_PLAYERS_DATA = [];
 
     function updatePlayerUI(p, players) {
         const lifeEl    = document.getElementById(`life-${p.id}`);
         const deltaEl   = document.getElementById(`delta-${p.id}`);
         const poisonEl  = document.getElementById(`poison-${p.id}`);
         const taxEl     = document.getElementById(`tax-${p.id}`);
-        const poisonWrap= document.getElementById(`poison-wrap-${p.id}`);
         const card      = document.getElementById(`player-${p.id}`);
         const connBadge = document.getElementById(`conn-${p.id}`);
-        const nameInput = card ? card.querySelector('.player-name') : null;
-        const poisonLabelInput = document.getElementById(`label-poison-${p.id}`);
-        const deathOverlay = document.getElementById(`death-${p.id}`);
-
         if (!lifeEl) return;
 
-        // Theme and Connection
         card.dataset.theme = p.theme || 'default';
         card.classList.toggle('danger', p.life <= 5);
-        card.classList.toggle('disconnected', !p.connected);
+        const shouldOpace = !p.connected && !(isLeader && roomMode === 'group');
+        card.classList.toggle('disconnected', shouldOpace);
         if (connBadge) connBadge.classList.toggle('online', p.connected);
-
-        // Commander Background Sync
-        if (p.commanderImage) {
-            card.style.backgroundImage = `url("${p.commanderImage}")`;
-            card.classList.add('has-bg');
-        } else {
-            card.style.backgroundImage = '';
-            card.classList.remove('has-bg');
-        }
-
-        // Life and Delta
 
         if (p.commanderImage) {
             if (card.style.backgroundImage !== `url("${p.commanderImage}")`) {
@@ -1161,7 +1418,6 @@
             card.classList.remove('has-bg');
         }
 
-        // Life and Delta
         const oldLife = prevLife[p.id];
         const delta = (oldLife !== undefined) ? (p.life - oldLife) : undefined;
         prevLife[p.id] = p.life;
@@ -1173,350 +1429,210 @@
             deltaEl.className = 'delta show ' + (delta > 0 ? 'positive' : 'negative');
             clearTimeout(deltaEl._t);
             deltaEl._t = setTimeout(() => deltaEl.classList.remove('show'), 1200);
-            
             lifeEl.classList.remove('bump');
             void lifeEl.offsetWidth;
             lifeEl.classList.add('bump');
         }
 
-        // Mana
         ['w','u','b','r','g','c'].forEach(c => {
             const mEl = document.getElementById(`mana-${p.id}-${c}`);
             if (mEl) mEl.textContent = p.mana ? p.mana[c] : 0;
         });
 
-        // Mini counters
         if (poisonEl) poisonEl.textContent = p.poison;
         if (taxEl) taxEl.textContent = p.commanderTax || 0;
-        if (poisonWrap) poisonWrap.classList.toggle('poison-critical', p.poison >= 10);
 
-        // Name and Poison Label
+        const nameInput = card.querySelector('.player-name');
         if (nameInput && document.activeElement !== nameInput) nameInput.value = p.name;
-        if (poisonLabelInput && document.activeElement !== poisonLabelInput) poisonLabelInput.value = p.poisonLabel || '☠ Veneno';
 
-        // Death logic
-        const hasLostByLife = p.life <= 0;
+        const deathOverlay = document.getElementById(`death-${p.id}`);
         const hasLostByCmdr = Object.values(p.commanderDamage || {}).some(v => v >= 21);
-        if (deathOverlay) deathOverlay.classList.toggle('show', hasLostByLife || hasLostByCmdr);
+        if (deathOverlay) deathOverlay.classList.toggle('show', p.life <= 0 || hasLostByCmdr);
 
-        // Commander Matrix
         const matrix = document.getElementById(`cmdr-matrix-${p.id}`);
         if (matrix) {
-            const isMe = p.id === mySlot;
+            const canEdit = (p.id === mySlot) || (isLeader && roomMode === 'group');
+            const disableAttr = canEdit ? '' : 'disabled';
             matrix.innerHTML = players.filter(other => other.id !== p.id).map(other => `
                 <div class="cmdr-dmg-item">
                     <span class="cmdr-dmg-label">VS ${escHtml(other.name)}</span>
                     <div class="mini-controls">
-                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="-1" ${isMe ? '' : 'disabled'}>-</button>
+                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="-1" ${disableAttr}>-</button>
                         <span class="mini-val">${p.commanderDamage ? (p.commanderDamage[other.id] || 0) : 0}</span>
-                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="+1" ${isMe ? '' : 'disabled'}>+</button>
+                        <button class="btn-mini" data-pid="${p.id}" data-type="cmdrDmg" data-target="${other.id}" data-delta="+1" ${disableAttr}>+</button>
                     </div>
                 </div>
             `).join('');
         }
     }
 
-    socket.on('game_state', ({ players }) => {
-        players.forEach(p => updatePlayerUI(p, players));
-    });
+    // ─────────────────────────────────────────────
+    // LOG LOGIC
+    // ─────────────────────────────────────────────
+    let logData = [];
+    let logBuffer = {};
+    let logTimer = null;
+
+    function renderLog() {
+        const logList = document.getElementById('log-list');
+        if (!logList) return;
+        logList.innerHTML = logData.map(entry => `
+            <div class="log-entry log-${entry.type || 'general'}">
+                <span class="log-time">${entry.time}</span> ${escHtml(entry.msg)}
+            </div>
+        `).join('');
+    }
+
+    function addToLog(entry) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (typeof entry === 'string' || ['reset','player'].includes(entry.type)) {
+            logData.push({ time, msg: typeof entry === 'string' ? entry : entry.msg, type: entry.type || 'general' });
+            if (logData.length > 100) logData.shift();
+            renderLog(); return;
+        }
+        const key = `${entry.pid}_${entry.type}_${entry.target || entry.color || ''}`;
+        if (!logBuffer[key]) { logBuffer[key] = { ...entry, lastUpdate: Date.now() }; }
+        else { logBuffer[key].delta = (logBuffer[key].delta || 0) + (entry.delta || 0); logBuffer[key].lastUpdate = Date.now(); }
+        if (!logTimer) logTimer = setTimeout(processLogBuffer, 1000);
+    }
+
+    function processLogBuffer() {
+        const now = Date.now();
+        for (const key in logBuffer) {
+            const item = logBuffer[key];
+            if (now - item.lastUpdate >= 1500) {
+                const time = new Date(item.lastUpdate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                let msg = item.msg;
+                const pName = item.playerName || `Jugador ${item.pid}`;
+                if (['damage','gain'].includes(item.type)) msg = `${pName} ${item.delta < 0 ? 'perdió' : 'ganó'} ${Math.abs(item.delta)} vida`;
+                else if (item.type === 'cmdr') msg = `${pName} recibió ${item.delta} daño Cmdr de ${item.targetName || 'Jugador'}`;
+                logData.push({ time, msg, type: item.type });
+                if (logData.length > 100) logData.shift();
+                delete logBuffer[key];
+            }
+        }
+        renderLog();
+        if (Object.keys(logBuffer).length > 0) logTimer = setTimeout(processLogBuffer, 500); else logTimer = null;
+    }
+
+    const originalEmit = socket.emit;
+    socket.emit = function(event, data) {
+        if (event === 'life_change') {
+            const p = ALL_PLAYERS_DATA.find(x => x.id === data.pid);
+            addToLog({ pid: data.pid, type: data.delta < 0 ? 'damage' : 'gain', delta: data.delta, playerName: p ? p.name : null });
+        } else if (event === 'counter_change' && data.type === 'cmdrDmg') {
+            const p = ALL_PLAYERS_DATA.find(x => x.id === data.pid);
+            const t = ALL_PLAYERS_DATA.find(x => x.id === parseInt(data.target));
+            addToLog({ pid: data.pid, type: 'damage', delta: -data.delta, playerName: p ? p.name : null });
+            addToLog({ pid: data.pid, type: 'cmdr', delta: data.delta, target: data.target, playerName: p ? p.name : null, targetName: t ? t.name : null });
+        }
+        return originalEmit.apply(socket, arguments);
+    };
+
+    socket.on('game_state', ({ players }) => { ALL_PLAYERS_DATA = players; players.forEach(p => updatePlayerUI(p, players)); });
 
     // ─────────────────────────────────────────────
-    // EVENTS: life buttons
+    // GLOBAL EVENTS
     // ─────────────────────────────────────────────
     grid.addEventListener('click', e => {
         const btn = e.target.closest('button');
         const themeBtn = e.target.closest('.theme-btn');
         const focusBtn = e.target.closest('.focus-btn');
-        const closeBtn = e.target.closest('.cmdr-close');
-        const manaClose = e.target.closest('.mana-close');
-        
-        if (!btn && !themeBtn && !focusBtn && !closeBtn && !manaClose) return;
+        const cmdrBtn = e.target.closest('.cmdr-btn');
+        const searchItem = e.target.closest('.search-item');
+        const closeBtn = e.target.closest('.cmdr-close, .mana-close');
 
-        // Commander detail close
-        if (closeBtn || (btn && btn.classList.contains('cmdr-close'))) {
-            const pid = closeBtn ? parseInt(closeBtn.closest('.cmdr-details').id.replace('cmdr-det-', '')) : parseInt(btn.closest('.cmdr-details').id.replace('cmdr-det-', ''));
-            document.getElementById(`cmdr-det-${pid}`).classList.remove('show');
+        if (cmdrBtn) {
+            const pid = parseInt(cmdrBtn.dataset.pid);
+            if (pid !== mySlot && !(isLeader && roomMode === 'group')) return;
+            const cont = document.getElementById(`search-container-${pid}`);
+            const isVis = cont.style.display !== 'none';
+            document.querySelectorAll('.search-container').forEach(c => c.style.display = 'none');
+            cont.style.display = isVis ? 'none' : 'flex';
+            if (!isVis) cont.querySelector('input').focus();
             return;
         }
 
-        // Mana dropdown close
-        if (manaClose) {
-            const pid = parseInt(manaClose.closest('.mana-dropdown').id.replace('mana-drop-', ''));
-            manaClose.closest('.mana-dropdown').classList.remove('show');
+        if (searchItem) {
+            const pid = parseInt(searchItem.closest('.search-container').id.replace('search-container-', ''));
+            socket.emit('name_change', { pid, name: searchItem.dataset.name });
+            socket.emit('counter_change', { pid, type: 'commanderImage', label: searchItem.dataset.img });
+            searchItem.closest('.search-container').style.display = 'none';
             return;
         }
 
-        // Focus toggle
+        if (closeBtn) {
+            const p = closeBtn.closest('.cmdr-details, .mana-dropdown');
+            p.classList.remove('show'); if(p.style.display === 'flex') p.style.display = 'none';
+            return;
+        }
+
         if (focusBtn) {
             const pid = parseInt(focusBtn.dataset.pid);
             const card = document.getElementById(`player-${pid}`);
-            const isFocused = card.classList.contains('focused');
-            
+            const isF = card.classList.contains('focused');
             document.querySelectorAll('.player').forEach(p => p.classList.remove('focused'));
             grid.classList.remove('has-focus');
-
-            if (!isFocused) {
-                card.classList.add('focused');
-                grid.classList.add('has-focus');
-                focusBtn.textContent = '❌';
-            } else {
-                focusBtn.textContent = '🔍';
-            }
+            if (!isF) { card.classList.add('focused'); grid.classList.add('has-focus'); focusBtn.textContent = '❌'; }
+            else focusBtn.textContent = '🔍';
             return;
         }
 
-        // Theme picker (must be before btn.disabled check since themeBtn is not a button)
         if (themeBtn) {
-            const pid = parseInt(themeBtn.dataset.pid);
-            const card = document.getElementById(`player-${pid}`);
-            const themes = ['default', 'w', 'u', 'b', 'r', 'g', 'c'];
-            const current = card.dataset.theme || 'default';
-            const next = themes[(themes.indexOf(current) + 1) % themes.length];
-            socket.emit('counter_change', { pid, type: 'theme', label: next });
+            const card = themeBtn.closest('.player');
+            const themes = ['default','w','u','b','r','g','c'];
+            const next = themes[(themes.indexOf(card.dataset.theme || 'default') + 1) % themes.length];
+            socket.emit('counter_change', { pid: parseInt(themeBtn.dataset.pid), type: 'theme', label: next });
             return;
         }
 
-        // Skip disabled buttons
-        if (btn && btn.disabled) return;
-
+        if (!btn || btn.disabled) return;
         const pid = parseInt(btn.dataset.pid);
-        const type = btn.dataset.type;
-        const delta = parseInt(btn.dataset.delta);
-        const target = btn.dataset.target;
-        const color = btn.dataset.color;
-
-        // Mana dropdown toggle
-        if (btn.classList.contains('mana-selector-btn')) {
-            const drop = document.getElementById(`mana-drop-${pid}`);
-            document.querySelectorAll('.mana-dropdown').forEach(d => { if(d !== drop) d.classList.remove('show'); });
-            drop.classList.add('show');
-            return;
-        }
-
-        // Commander detail toggle
-        if (btn.classList.contains('cmdr-adv-btn')) {
-            document.getElementById(`cmdr-det-${pid}`).classList.add('show');
-            return;
-        }
-
-        // Revive
-        if (btn.classList.contains('revive-btn')) {
-            socket.emit('revive_player', { pid });
-            return;
-        }
-
-        if (!type && delta) {
-            socket.emit('life_change', { pid, delta });
-        } else if (type) {
-            socket.emit('counter_change', { pid, type, delta, color, target });
-        }
+        const { type, delta, color, target } = btn.dataset;
+        if (btn.classList.contains('mana-selector-btn')) { document.getElementById(`mana-drop-${pid}`).classList.add('show'); return; }
+        if (btn.classList.contains('cmdr-adv-btn')) { document.getElementById(`cmdr-det-${pid}`).classList.add('show'); return; }
+        if (btn.classList.contains('revive-btn')) { socket.emit('revive_player', { pid }); return; }
+        if (!type && delta) socket.emit('life_change', { pid, delta: parseInt(delta) });
+        else if (type) socket.emit('counter_change', { pid, type, delta: parseInt(delta), color, target });
     });
 
-    // Close mana dropdowns clicking outside
-    window.addEventListener('click', e => {
-        if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) {
-            document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
-        }
-    });
-
-    // Right click mana to subtract
-    grid.addEventListener('contextmenu', e => {
-        const btn = e.target.closest('.btn-mana');
-        if (btn && !btn.disabled) {
-            e.preventDefault();
-            const pid = parseInt(btn.dataset.pid);
-            const color = btn.dataset.color;
-            socket.emit('counter_change', { pid, type: 'mana', color, delta: -1 });
-        }
-    });
-
-    // ─────────────────────────────────────────────
-    // EVENTS: name input
-    // ─────────────────────────────────────────────
-    grid.addEventListener('input', e => {
-        const pid = parseInt(e.target.closest('.player').dataset.player);
-        if (e.target.classList.contains('player-name')) {
-            socket.emit('name_change', { pid, name: e.target.value });
-        } else if (e.target.classList.contains('mini-label-input')) {
-            socket.emit('counter_change', { pid, type: 'poisonLabel', label: e.target.value });
-        }
-    });
-
-    // ─────────────────────────────────────────────
-    // EVENTS: reset
-    // ─────────────────────────────────────────────
-    const overlay    = document.getElementById('confirm-overlay');
-    const confirmYes = document.getElementById('confirm-yes');
-    const confirmNo  = document.getElementById('confirm-no');
-
-    document.getElementById('reset-btn').addEventListener('click', () => overlay.classList.add('show'));
-    confirmNo.addEventListener('click', () => overlay.classList.remove('show'));
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
-    confirmYes.addEventListener('click', () => {
-        socket.emit('reset_game');
-        overlay.classList.remove('show');
-    });
-
-    // ─────────────────────────────────────────────
-    // COPY ROOM CODE
-    // ─────────────────────────────────────────────
-    document.getElementById('room-code-badge').addEventListener('click', () => {
-        if (!myRoomCode) return;
-        navigator.clipboard.writeText(myRoomCode).then(() => showToast('✓ Código copiado: ' + myRoomCode));
-    });
-
-    // ─────────────────────────────────────────────
-    // Double tap for Focus
-    // ─────────────────────────────────────────────
-    let lastTap = 0;
-    grid.addEventListener('touchstart', e => {
-        // Ignore taps on buttons, inputs or search results
-        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.search-container')) {
-            return;
-        }
-
-        const card = e.target.closest('.player');
-        if (!card) return;
-        const now = Date.now();
-        const TIMESPAN = 300;
-        if (now - lastTap < TIMESPAN) {
-            const pid = parseInt(card.dataset.player);
-            const focusBtn = card.querySelector('.focus-btn');
-            if (focusBtn) focusBtn.click();
-        }
-        lastTap = now;
-    });
-
-    // ─────────────────────────────────────────────
-    // DRAGGABLE MANA WINDOW
-    // ─────────────────────────────────────────────
-    let activeDrag = null;
-    let startX, startY, initialX, initialY;
-
-    function startDragging(e) {
-        const header = e.target.closest('.mana-drop-header');
-        if (!header) return;
-
-        activeDrag = header.closest('.mana-dropdown');
-        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-        startX = clientX;
-        startY = clientY;
-        
-        const style = window.getComputedStyle(activeDrag);
-        const matrix = new DOMMatrixReadOnly(style.transform);
-        initialX = matrix.m41;
-        initialY = matrix.m42;
-        
-        activeDrag.style.transition = 'none';
-        activeDrag.style.zIndex = '2000'; // Bring to front
-    }
-
-    function doDragging(e) {
-        if (!activeDrag) return;
-        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-        
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-        
-        activeDrag.style.transform = `translate(calc(-50% + ${initialX + dx}px), calc(-50% + ${initialY + dy}px))`;
-    }
-
-    function stopDragging() {
-        if (!activeDrag) return;
-        activeDrag.style.transition = '';
-        activeDrag = null;
-    }
-
-    document.addEventListener('mousedown', startDragging);
-    document.addEventListener('mousemove', doDragging);
-    document.addEventListener('mouseup', stopDragging);
-    document.addEventListener('touchstart', startDragging, { passive: false });
-    document.addEventListener('touchmove', (e) => {
-        if (activeDrag) {
-            e.preventDefault();
-            doDragging(e);
-        }
-    }, { passive: false });
-    // ─────────────────────────────────────────────
-    // COMMANDER SEARCH (Scryfall)
-    // ─────────────────────────────────────────────
     let searchTimeout = null;
-
-    grid.addEventListener('click', e => {
-        const cmdrBtn = e.target.closest('.cmdr-btn');
-        if (cmdrBtn) {
-            const pid = parseInt(cmdrBtn.dataset.pid);
-            if (pid !== mySlot) return;
-            const container = document.getElementById(`search-container-${pid}`);
-            const isVisible = container.style.display !== 'none';
-            container.style.display = isVisible ? 'none' : 'flex';
-            if (!isVisible) document.getElementById(`search-input-${pid}`).focus();
-        }
-
-        const searchItem = e.target.closest('.search-item');
-        if (searchItem) {
-            const pid = mySlot;
-            const name = searchItem.dataset.name;
-            const img = searchItem.dataset.img;
-            
-            // Update local state and sync
-            socket.emit('name_change', { pid, name });
-            socket.emit('counter_change', { pid, type: 'commanderImage', label: img });
-            
-            // Hide search
-            document.getElementById(`search-container-${pid}`).style.display = 'none';
-        }
-    });
-
     grid.addEventListener('input', e => {
-        if (e.target.classList.contains('search-input')) {
+        const playerCard = e.target.closest('.player');
+        if (!playerCard) return;
+        const pid = parseInt(playerCard.dataset.player);
+        if (e.target.classList.contains('player-name')) socket.emit('name_change', { pid, name: e.target.value });
+        else if (e.target.classList.contains('mini-label-input')) socket.emit('counter_change', { pid, type: 'poisonLabel', label: e.target.value });
+        else if (e.target.classList.contains('search-input')) {
             const query = e.target.value.trim();
-            const pid = mySlot;
-            const resultsEl = document.getElementById(`search-results-${pid}`);
-
+            const resEl = document.getElementById(`search-results-${pid}`);
             clearTimeout(searchTimeout);
-            if (query.length < 3) {
-                resultsEl.innerHTML = '';
-                resultsEl.classList.remove('show');
-                return;
-            }
-
+            if (query.length < 3) { resEl.innerHTML = ''; resEl.classList.remove('show'); return; }
             searchTimeout = setTimeout(async () => {
                 try {
                     const resp = await fetch(`https://api.scryfall.com/cards/search?q=is:commander+${encodeURIComponent(query)}`);
                     const data = await resp.json();
-                    
-                    if (data.data && data.data.length > 0) {
-                        resultsEl.innerHTML = data.data.slice(0, 8).map(card => {
-                            const img = card.image_uris ? card.image_uris.art_crop : 
-                                       (card.card_faces ? card.card_faces[0].image_uris.art_crop : '');
-                            return `
-                                <div class="search-item" data-name="${escHtml(card.name)}" data-img="${img}">
-                                    ${escHtml(card.name)}
-                                </div>
-                            `;
-                        }).join('');
-                        resultsEl.classList.add('show');
-                    } else {
-                        resultsEl.innerHTML = '<div class="search-item">No se encontraron comandantes</div>';
-                        resultsEl.classList.add('show');
-                    }
-                } catch (err) {
-                    console.error('Scryfall error:', err);
-                }
+                    if (data.data) {
+                        resEl.innerHTML = data.data.slice(0,8).map(c => `<div class="search-item" data-name="${escHtml(c.name)}" data-img="${c.image_uris?c.image_uris.art_crop:(c.card_faces?c.card_faces[0].image_uris.art_crop:'')}">${escHtml(c.name)}</div>`).join('');
+                        resEl.classList.add('show');
+                    } else { resEl.innerHTML = '<div class="search-item">No encontrado</div>'; resEl.classList.add('show'); }
+                } catch(e) { console.error(e); }
             }, 400);
         }
     });
 
-    document.addEventListener('touchend', stopDragging);
+    window.addEventListener('click', e => {
+        if (!e.target.closest('.search-container') && !e.target.closest('.cmdr-btn')) document.querySelectorAll('.search-container').forEach(c => c.style.display = 'none');
+        if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
+    });
 
-    // ─────────────────────────────────────────────
-    // TOUCH: prevent scroll/zoom on grid
-    // ─────────────────────────────────────────────
-    // REMOVED: document.addEventListener('touchmove', e => { ...
+    document.getElementById('reset-btn').addEventListener('click', () => document.getElementById('confirm-overlay').classList.add('show'));
+    document.getElementById('confirm-no').addEventListener('click', () => document.getElementById('confirm-overlay').classList.remove('show'));
+    document.getElementById('confirm-yes').addEventListener('click', () => { socket.emit('reset_game'); document.getElementById('confirm-overlay').classList.remove('show'); });
+    document.getElementById('room-code-badge').addEventListener('click', () => { if(myRoomCode) navigator.clipboard.writeText(myRoomCode).then(()=>showToast('✓ Copiado: '+myRoomCode)); });
+    document.getElementById('toggle-log-btn').addEventListener('click', () => document.getElementById('log-overlay').classList.toggle('show'));
+    document.getElementById('close-log').addEventListener('click', () => document.getElementById('log-overlay').classList.remove('show'));
+    document.getElementById('clear-log').addEventListener('click', () => { logData=[]; renderLog(); });
 </script>
-
 </body>
 </html>
