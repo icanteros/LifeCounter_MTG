@@ -2168,6 +2168,11 @@
                     const pName = item.playerName || `Jugador ${item.pid}`;
                     if (['damage', 'gain'].includes(item.type)) msg = `${pName} ${item.delta < 0 ? 'perdió' : 'ganó'} ${Math.abs(item.delta)} vida`;
                     else if (item.type === 'cmdr') msg = `${pName} recibió ${item.delta} daño Cmdr de ${item.targetName || 'Jugador'}`;
+                    else if (item.type === 'mana') {
+                        const colorNames = { w: 'blanco', u: 'azul', b: 'negro', r: 'rojo', g: 'verde', c: 'incoloro' };
+                        const cName = colorNames[item.color] || item.color;
+                        msg = `${pName} ${item.delta < 0 ? 'quitó' : 'agregó'} ${Math.abs(item.delta)} de maná ${cName}`;
+                    }
                     logData.push({ time, msg, type: item.type });
                     if (logData.length > 100) logData.shift();
                     delete logBuffer[key];
@@ -2187,6 +2192,9 @@
                 const t = ALL_PLAYERS_DATA.find(x => x.id === parseInt(data.target));
                 addToLog({ pid: data.pid, type: 'damage', delta: -data.delta, playerName: p ? p.name : null });
                 addToLog({ pid: data.pid, type: 'cmdr', delta: data.delta, target: data.target, playerName: p ? p.name : null, targetName: t ? t.name : null });
+            } else if (event === 'counter_change' && data.type === 'mana') {
+                const p = ALL_PLAYERS_DATA.find(x => x.id === data.pid);
+                addToLog({ pid: data.pid, type: 'mana', color: data.color, delta: data.delta, playerName: p ? p.name : null });
             }
             return originalEmit.apply(socket, arguments);
         };
@@ -2332,6 +2340,49 @@
             const action = type === 'coin' ? 'lanzó una moneda' : `tiró un ${type.toUpperCase()}`;
             addToLog({ time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), msg: `${name} ${action}: ${result}`, type: 'general' });
             showToast(`🎲 ${name} sacó: ${result}`, 3000);
+        });
+
+        // Drag logic for mana dropdown
+        let isDraggingMana = false;
+        let dragTarget = null;
+        let startX, startY, initialLeft, initialTop;
+
+        document.addEventListener('pointerdown', (e) => {
+            const header = e.target.closest('.mana-drop-header');
+            if (header) {
+                isDraggingMana = true;
+                dragTarget = header.closest('.mana-dropdown');
+                
+                const rect = dragTarget.getBoundingClientRect();
+                
+                dragTarget.style.transform = 'none';
+                dragTarget.style.left = rect.left + 'px';
+                dragTarget.style.top = rect.top + 'px';
+
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = rect.left;
+                initialTop = rect.top;
+                
+                header.setPointerCapture(e.pointerId);
+            }
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (!isDraggingMana || !dragTarget) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            dragTarget.style.left = (initialLeft + dx) + 'px';
+            dragTarget.style.top = (initialTop + dy) + 'px';
+        });
+
+        document.addEventListener('pointerup', (e) => {
+            if (isDraggingMana && dragTarget) {
+                const header = e.target.closest('.mana-drop-header');
+                if (header) header.releasePointerCapture(e.pointerId);
+                isDraggingMana = false;
+                dragTarget = null;
+            }
         });
     </script>
 </body>
