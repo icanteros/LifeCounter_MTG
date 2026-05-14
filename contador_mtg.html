@@ -374,15 +374,16 @@
 
         @media (max-width: 768px) and (orientation: portrait) {
             #grid {
-                grid-template-columns: 1fr;
-                grid-template-rows: repeat(4, 1fr);
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
                 min-height: 100%;
-                gap: 5px;
-                padding: 5px;
+                gap: 2px;
+                padding: 2px;
             }
 
             .player {
-                min-height: 24vh;
+                min-height: 0;
+                height: 100%;
                 padding: 8px 5px;
                 gap: 5px;
             }
@@ -1075,11 +1076,12 @@
             inset: 0;
             background: rgba(10, 10, 15, 0.95);
             z-index: 10;
-            padding: 15px;
+            padding: 10px;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             border-radius: 12px;
             backdrop-filter: blur(4px);
+            overflow-y: auto;
         }
 
         .cmdr-details.show {
@@ -1102,8 +1104,8 @@
 
         .cmdr-matrix {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            grid-template-columns: 1fr;
+            gap: 4px;
         }
 
         .cmdr-dmg-item {
@@ -1631,7 +1633,7 @@
                 <div id="title-container">
                     <span id="title">Life Commander</span>
                     <span
-                        style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.3.0</span>
+                        style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.4.0</span>
                 </div>
 
                 <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
@@ -2218,9 +2220,9 @@
             if (header) {
                 isDraggingMana = true;
                 dragTarget = header.closest('.mana-dropdown');
-                
+
                 const rect = dragTarget.getBoundingClientRect();
-                
+
                 dragTarget.style.transform = 'none';
                 dragTarget.style.left = rect.left + 'px';
                 dragTarget.style.top = rect.top + 'px';
@@ -2229,7 +2231,7 @@
                 startY = e.clientY;
                 initialLeft = rect.left;
                 initialTop = rect.top;
-                
+
                 header.setPointerCapture(e.pointerId);
             }
         });

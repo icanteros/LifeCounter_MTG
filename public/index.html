@@ -355,14 +355,15 @@
 
         @media (max-width: 768px) and (orientation: portrait) {
             #grid {
-                grid-template-columns: 1fr;
-                grid-template-rows: repeat(4, 1fr);
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
                 gap: 2px;
                 padding: 2px;
             }
 
             .player {
                 min-height: 0;
+                height: 100%;
                 padding: 10px 5px;
                 gap: 2px;
             }
@@ -650,11 +651,29 @@
             border-color: rgba(201, 168, 76, 0.5);
         }
 
-        .theme-btn { top: 10px; left: 10px; }
-        .cmdr-btn { top: 10px; left: 42px; }
-        .full-art-btn { top: 10px; left: 74px; }
-        .focus-btn { top: 10px; right: 42px; }
-        .player.focused .focus-btn { color: var(--gold); }
+        .theme-btn {
+            top: 10px;
+            left: 10px;
+        }
+
+        .cmdr-btn {
+            top: 10px;
+            left: 42px;
+        }
+
+        .full-art-btn {
+            top: 10px;
+            left: 74px;
+        }
+
+        .focus-btn {
+            top: 10px;
+            right: 42px;
+        }
+
+        .player.focused .focus-btn {
+            color: var(--gold);
+        }
 
         /* DICE BUTTON */
         .dice-btn-player {
@@ -671,6 +690,7 @@
             justify-content: center;
             height: 100%;
         }
+
         .dice-btn-player:hover {
             color: var(--gold);
             background: rgba(255, 255, 255, 0.1);
@@ -1082,11 +1102,12 @@
             inset: 0;
             background: rgba(10, 10, 15, 0.95);
             z-index: 10;
-            padding: 15px;
+            padding: 10px;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             border-radius: 12px;
             backdrop-filter: blur(4px);
+            overflow-y: auto;
         }
 
         .cmdr-details.show {
@@ -1109,8 +1130,8 @@
 
         .cmdr-matrix {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            grid-template-columns: 1fr;
+            gap: 4px;
         }
 
         .cmdr-dmg-item {
@@ -1656,7 +1677,7 @@
                 <div id="title-container">
                     <span id="title">LOTUS LIFE</span>
                     <span
-                        style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.3.0</span>
+                        style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.4.0</span>
                 </div>
 
                 <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
@@ -1707,28 +1728,42 @@
         </div>
 
         <!-- Dice Overlay -->
-        <div id="dice-overlay" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 300;">
-            <div style="background: #16162a; border: 1px solid var(--gold-dark); border-radius: 16px; padding: 30px 36px; text-align: center; box-shadow: 0 0 40px rgba(201,168,76,0.25); max-width: 90vw;">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 20px;">🎲 Lanzar al azar</h2>
+        <div id="dice-overlay" class="screen"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 300;">
+            <div
+                style="background: #16162a; border: 1px solid var(--gold-dark); border-radius: 16px; padding: 30px 36px; text-align: center; box-shadow: 0 0 40px rgba(201,168,76,0.25); max-width: 90vw;">
+                <h2 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 20px;">🎲 Lanzar al azar
+                </h2>
                 <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
-                    <button class="lobby-btn-secondary" onclick="rollDice('coin')" style="padding: 10px 15px; width: auto;">🪙 Moneda</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('coin')"
+                        style="padding: 10px 15px; width: auto;">🪙 Moneda</button>
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <button class="lobby-btn-secondary" onclick="rollDice('d4')" style="padding: 10px 15px; width: auto;">D4</button>
-                    <button class="lobby-btn-secondary" onclick="rollDice('d6')" style="padding: 10px 15px; width: auto;">D6</button>
-                    <button class="lobby-btn-secondary" onclick="rollDice('d8')" style="padding: 10px 15px; width: auto;">D8</button>
-                    <button class="lobby-btn-secondary" onclick="rollDice('d10')" style="padding: 10px 15px; width: auto;">D10</button>
-                    <button class="lobby-btn-secondary" onclick="rollDice('d12')" style="padding: 10px 15px; width: auto;">D12</button>
-                    <button class="lobby-btn-secondary" onclick="rollDice('d20')" style="padding: 10px 15px; width: auto;">D20</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('d4')"
+                        style="padding: 10px 15px; width: auto;">D4</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('d6')"
+                        style="padding: 10px 15px; width: auto;">D6</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('d8')"
+                        style="padding: 10px 15px; width: auto;">D8</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('d10')"
+                        style="padding: 10px 15px; width: auto;">D10</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('d12')"
+                        style="padding: 10px 15px; width: auto;">D12</button>
+                    <button class="lobby-btn-secondary" onclick="rollDice('d20')"
+                        style="padding: 10px 15px; width: auto;">D20</button>
                 </div>
-                <button id="close-dice" style="margin-top: 25px; background: transparent; color: var(--text-muted); border: none;">Cerrar</button>
+                <button id="close-dice"
+                    style="margin-top: 25px; background: transparent; color: var(--text-muted); border: none;">Cerrar</button>
             </div>
         </div>
 
         <!-- Full Art Overlay -->
-        <div id="full-art-overlay" class="screen" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 500; flex-direction: column;">
-            <img id="full-art-img" src="" style="max-width: 90%; max-height: 80vh; border-radius: 4.75% / 3.5%; box-shadow: 0 0 30px rgba(0,0,0,0.8);">
-            <button id="close-full-art" class="lobby-btn-secondary" style="margin-top: 20px; width: auto; padding: 10px 30px;">Cerrar</button>
+        <div id="full-art-overlay" class="screen"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 500; flex-direction: column;">
+            <img id="full-art-img" src=""
+                style="max-width: 90%; max-height: 80vh; border-radius: 4.75% / 3.5%; box-shadow: 0 0 30px rgba(0,0,0,0.8);">
+            <button id="close-full-art" class="lobby-btn-secondary"
+                style="margin-top: 20px; width: auto; padding: 10px 30px;">Cerrar</button>
         </div>
     </div>
 
@@ -1768,7 +1803,7 @@
                     pendingCode = roomCode;
                     pendingSlot = slot;
                     socket.emit('join_room', { code: roomCode, playerSlot: slot });
-                } catch(e) {}
+                } catch (e) { }
             }
         });
 
@@ -2195,6 +2230,13 @@
             } else if (event === 'counter_change' && data.type === 'mana') {
                 const p = ALL_PLAYERS_DATA.find(x => x.id === data.pid);
                 addToLog({ pid: data.pid, type: 'mana', color: data.color, delta: data.delta, playerName: p ? p.name : null });
+
+                // Optimistic UI Update
+                if (p && p.mana && p.mana.hasOwnProperty(data.color)) {
+                    p.mana[data.color] = Math.max(0, Math.min(99, p.mana[data.color] + data.delta));
+                    const mEl = document.getElementById(`mana-${data.pid}-${data.color}`);
+                    if (mEl) mEl.textContent = p.mana[data.color];
+                }
             }
             return originalEmit.apply(socket, arguments);
         };
@@ -2313,8 +2355,8 @@
                             }).join('');
                             resEl.classList.add('show');
                         }
-                    } catch (e) { 
-                        console.error("Error buscando carta:", e); 
+                    } catch (e) {
+                        console.error("Error buscando carta:", e);
                     }
                 }, 400);
             }
@@ -2352,9 +2394,9 @@
             if (header) {
                 isDraggingMana = true;
                 dragTarget = header.closest('.mana-dropdown');
-                
+
                 const rect = dragTarget.getBoundingClientRect();
-                
+
                 dragTarget.style.transform = 'none';
                 dragTarget.style.left = rect.left + 'px';
                 dragTarget.style.top = rect.top + 'px';
@@ -2363,7 +2405,7 @@
                 startY = e.clientY;
                 initialLeft = rect.left;
                 initialTop = rect.top;
-                
+
                 header.setPointerCapture(e.pointerId);
             }
         });

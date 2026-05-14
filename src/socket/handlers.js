@@ -265,6 +265,7 @@ function applyCounterChange(player, { type, delta, color, target, label }) {
 
   switch (type) {
     case 'mana':
+      if (!player.mana) player.mana = { w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
       if (color && player.mana.hasOwnProperty(color) && !isNaN(deltaNum)) {
         player.mana[color] = Math.max(0, Math.min(99, player.mana[color] + deltaNum));
       }
