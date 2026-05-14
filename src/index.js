@@ -1,4 +1,4 @@
-/**
+ /**
  * @file Entry point del servidor MTG Life Counter
  * @module index
  */

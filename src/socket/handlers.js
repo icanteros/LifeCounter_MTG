@@ -223,6 +223,35 @@ function registerSocketHandlers(io, roomManager, rateLimiter) {
 
       rateLimiter.cleanup(socket.id);
     });
+
+    // ── DICE / COIN ROLL ──────────────────────────────────────────
+    socket.on('roll_dice', ({ type }) => {
+      const room = roomManager.getRoom(socket.data.roomCode);
+      if (!room) return;
+      
+      const player = room.players.find(p => p.id === socket.data.playerSlot);
+      if (!player) return;
+
+      if (!rateLimiter.check(socket.id, config.RATE_LIMIT_EVENTS, config.RATE_LIMIT_WINDOW)) return;
+
+      let result = '';
+      if (type === 'coin') {
+        result = Math.random() < 0.5 ? 'Cara' : 'Cruz';
+      } else if (type.startsWith('d')) {
+        const max = parseInt(type.substring(1));
+        if ([4, 6, 8, 10, 12, 20].includes(max)) {
+          result = Math.floor(Math.random() * max) + 1;
+        } else return;
+      } else return;
+
+      io.to(socket.data.roomCode).emit('dice_rolled', {
+        pid: player.id,
+        playerName: player.name,
+        type,
+        result
+      });
+    });
+
   });
 }
 
@@ -275,12 +304,23 @@ function applyCounterChange(player, { type, delta, color, target, label }) {
       }
       break;
     case 'commanderImage':
-      // label here contains the image URL
-      if (typeof label === 'string' && label.length < 500) {
-        // basic cleanup to prevent breaking out of url("")
-        player.commanderImage = label.replace(/"/g, '').replace(/'/g, '').replace(/\)/g, '');
+      if (typeof label === 'string' && label.length < 2000) {
+        if (label.startsWith('{')) {
+          try {
+            const data = JSON.parse(label);
+            player.commanderImage = data.crop.replace(/"/g, '').replace(/'/g, '').replace(/\)/g, '');
+            player.commanderFull = data.full.replace(/"/g, '').replace(/'/g, '').replace(/\)/g, '');
+          } catch(e) {
+            player.commanderImage = null;
+            player.commanderFull = null;
+          }
+        } else {
+          player.commanderImage = label.replace(/"/g, '').replace(/'/g, '').replace(/\)/g, '');
+          player.commanderFull = null;
+        }
       } else {
         player.commanderImage = null;
+        player.commanderFull = null;
       }
       break;
   }
