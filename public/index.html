@@ -5,6 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MTG Life Counter — Multijugador</title>
+    <meta name="theme-color" content="#0a0a0f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -603,6 +608,14 @@
         .player[data-player="4"] {
             --accent: var(--p4-accent);
             --glow: var(--p4-glow);
+        }
+
+        .player.elevated {
+            z-index: 100 !important;
+        }
+
+        .player.elevated .player-content {
+            z-index: 100 !important;
         }
 
         /* Connected badge */
@@ -1677,7 +1690,7 @@
                 <div id="title-container">
                     <span id="title">LOTUS LIFE</span>
                     <span
-                        style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.4.0</span>
+                        style="font-size: 0.6rem; color: var(--gold-dark); opacity: 0.6; font-family: 'Cinzel', serif;">v0.6.0</span>
                 </div>
 
                 <span id="room-code-badge" title="Clic para copiar">Sala: <span id="game-code-display"></span></span>
@@ -2288,6 +2301,8 @@
             if (closeBtn) {
                 const p = closeBtn.closest('.cmdr-details, .mana-dropdown');
                 p.classList.remove('show'); if (p.style.display === 'flex') p.style.display = 'none';
+                const playerCard = p.closest('.player');
+                if (playerCard) playerCard.classList.remove('elevated');
                 return;
             }
 
@@ -2317,8 +2332,16 @@
             if (!btn || btn.disabled) return;
             const pid = parseInt(btn.dataset.pid);
             const { type, delta, color, target } = btn.dataset;
-            if (btn.classList.contains('mana-selector-btn')) { document.getElementById(`mana-drop-${pid}`).classList.add('show'); return; }
-            if (btn.classList.contains('cmdr-adv-btn')) { document.getElementById(`cmdr-det-${pid}`).classList.add('show'); return; }
+            if (btn.classList.contains('mana-selector-btn')) { 
+                document.getElementById(`mana-drop-${pid}`).classList.add('show'); 
+                document.getElementById(`player-${pid}`).classList.add('elevated');
+                return; 
+            }
+            if (btn.classList.contains('cmdr-adv-btn')) { 
+                document.getElementById(`cmdr-det-${pid}`).classList.add('show'); 
+                document.getElementById(`player-${pid}`).classList.add('elevated');
+                return; 
+            }
             if (btn.classList.contains('revive-btn')) { socket.emit('revive_player', { pid }); return; }
             if (!type && delta) socket.emit('life_change', { pid, delta: parseInt(delta) });
             else if (type) socket.emit('counter_change', { pid, type, delta: parseInt(delta), color, target });
@@ -2364,7 +2387,13 @@
 
         window.addEventListener('click', e => {
             if (!e.target.closest('.search-container') && !e.target.closest('.cmdr-btn')) document.querySelectorAll('.search-container').forEach(c => c.style.display = 'none');
-            if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) document.querySelectorAll('.mana-dropdown').forEach(d => d.classList.remove('show'));
+            if (!e.target.closest('.mana-dropdown') && !e.target.closest('.mana-selector-btn')) {
+                document.querySelectorAll('.mana-dropdown').forEach(d => {
+                    d.classList.remove('show');
+                    const p = d.closest('.player');
+                    if (p) p.classList.remove('elevated');
+                });
+            }
         });
 
         document.getElementById('reset-btn').addEventListener('click', () => document.getElementById('confirm-overlay').classList.add('show'));
@@ -2426,6 +2455,17 @@
                 dragTarget = null;
             }
         });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 
